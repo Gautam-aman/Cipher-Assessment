@@ -6,6 +6,7 @@ Blueprint is a focused low-level design practice studio. Choose a prompt, explai
 
 - Three contextualized LLD challenges: parking lot, vending machine, and elevator system.
 - A lazy-loaded Three.js preview with procedural geometry, drag orbit, keyboard orbit, and challenge-specific interactions.
+- A continuously moving 3D preview, looping parking demo with pause/reset, animated vending dispense and reset, and elevator travel with door motion.
 - Accessible preview controls and a static SVG fallback when WebGL is unavailable.
 - Structured text submission, browser-local drafts, and attempt history.
 - Six-part deterministic review with evidence cues and specific improvement prompts.
@@ -49,6 +50,7 @@ The suite covers incomplete/valid submission, rubric feedback, malformed storage
 - Three.js is used directly instead of React Three Fiber because this is a dependency-light vanilla JavaScript app. Models are procedural and assets are not downloaded.
 - Rendering is capped at 1.5 device pixel ratio, throttled to about 30 fps, paused when offscreen, and disabled for reduced-motion users. Scene geometries and materials are disposed on model changes.
 - Preview buttons mirror key model interactions for keyboard and non-WebGL use. The vending flow is explicitly a local simulation; it does not process payment.
+- Scroll reveals and the document progress line use native scroll and `IntersectionObserver`; no scroll hijacking is used. See [motion verification](docs/MOTION_VERIFICATION.md) for checks and browser verification limits.
 - Structured text is the chosen submission format; UML/code editing is not implemented.
 - Feedback cues are deterministic and transparent, but they are not semantic evaluation and may miss equivalent wording.
 - Data stays in localStorage for this browser profile. There is no account, backend, sync, or cross-device history.

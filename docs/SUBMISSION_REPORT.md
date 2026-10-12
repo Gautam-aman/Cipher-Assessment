@@ -2,7 +2,7 @@
 
 ## What was built
 
-Blueprint is a single-screen LLD practice studio with three prompts, structured text design notes, local autosave, deterministic feedback over six design dimensions, and browser-local attempt history. Each challenge includes a lazy-loaded, interactive procedural Three.js preview, with keyboard and button controls that also work through a non-WebGL fallback. The vending machine demonstrates selection, simulated payment, and dispensing; the elevator responds to floor requests; and the parking scene highlights an available bay.
+Blueprint is a single-screen LLD practice studio with three prompts, structured text design notes, local autosave, deterministic feedback over six design dimensions, and browser-local attempt history. Each challenge includes a lazy-loaded procedural Three.js preview with purposeful motion and button controls that also work through a non-WebGL fallback. The vending machine demonstrates selection, simulated payment, animated dispensing, and reset; the elevator moves between floors and animates its doors; the parking demo cycles vehicles through bays with pause and reset controls. Scroll reveals and a document progress line add motion to the workspace. See [motion verification](MOTION_VERIFICATION.md) for implementation details and browser verification limits.
 
 The interface now follows the Midnight Studio direction: deep navy and charcoal surfaces, violet-to-cyan accents, an atmospheric design-loop hero, challenge mission cards with real attempt status, a collapsible desktop rail, horizontal small-screen challenge navigation, and editor section readiness feedback. Motion is transition-led and reduced-motion aware. See [the design audit](DESIGN_AUDIT.md).
 

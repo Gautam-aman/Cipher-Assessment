@@ -15,7 +15,8 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
   const camera = new THREE.PerspectiveCamera(31, 1, 0.1, 70);
   camera.position.set(6.2, 4.1, 7.4);
   camera.lookAt(0, 0.05, 0);
-  scene.add(new THREE.HemisphereLight(0xa8bdff, 0x111525, 2.15));
+  const ambientLight = new THREE.HemisphereLight(0xa8bdff, 0x111525, 2.15);
+  scene.add(ambientLight);
   const keyLight = new THREE.DirectionalLight(0xc5b4ff, 3.1);
   keyLight.position.set(-3, 6, 5);
   scene.add(keyLight);
@@ -42,6 +43,16 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
   let vendingScreen = null;
   let vendingPanel = null;
   let vendingSimulation = null;
+  let parkingCars = [];
+  let parkingRunning = true;
+  let parkingClock = 0;
+  let liftDoors = [];
+  let liftIndicator = null;
+  let liftButtons = [];
+  let dispenseMotion = null;
+  const floaters = [];
+  let pointerParallax = { x: 0, y: 0 };
+  const connectors = [];
   const raycaster = new THREE.Raycaster();
   const materialCache = new Map();
 
@@ -85,6 +96,13 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
     vendingPanel = null;
     vendingSimulation = null;
     vendingState = 'idle';
+    parkingCars = [];
+    liftDoors = [];
+    liftIndicator = null;
+    liftButtons = [];
+    dispenseMotion = null;
+    floaters.length = 0;
+    connectors.length = 0;
   }
 
   function materialCacheHas(item) {
@@ -116,6 +134,7 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
         const wheel = cylinder(car, 0.13, 0.13, 0.09, [wx, -0.1, wz], 0x151a26, 12);
         wheel.rotation.z = Math.PI / 2;
       }
+      parkingCars.push({ car, homeX: x, homeZ: z, offset: parkingCars.length * 4.1 });
     };
     vehicle(-1.2, 0.82, 0x8d79e8);
     vehicle(0.2, 0.82, 0x61cfc9);
@@ -138,6 +157,7 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
         product.userData.vendingProduct = true;
         product.userData.available = true;
         product.userData.productId = shelf * 4 + item;
+        product.userData.initialPosition = product.position.clone();
         clickTargets.push(product);
       }
     }
@@ -165,12 +185,19 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
     root.add(cabin);
     box(cabin, [1.08, 0.95, 0.92], [0.05, 0, 0], 0x4e5775, { metalness: 0.48 });
     box(cabin, [0.82, 0.76, 0.06], [0.05, 0, 0.49], 0x20283b, { metalness: 0.3 });
-    box(cabin, [0.12, 0.8, 0.03], [0.05, 0, 0.54], 0x72e5dd, { emissive: 0x299b9d });
+    for (const side of [-1, 1]) {
+      const door = box(cabin, [0.39, 0.8, 0.03], [0.05 + side * 0.2, 0, 0.54], 0x72e5dd, { emissive: 0x299b9d });
+      door.userData.closedX = door.position.x;
+      door.userData.open = false;
+      liftDoors.push(door);
+    }
     for (let floor = 0; floor < floorYs.length; floor++) {
       const button = cylinder(root, 0.09, 0.09, 0.06, [1.5, floorYs[floor] + 0.39, 1.02], 0x63e3dc, 20, { emissive: 0x248c89 });
       button.userData.floorRequest = floor;
       clickTargets.push(button);
+      liftButtons.push(button);
     }
+    liftIndicator = box(root, [0.22, 0.26, 0.06], [1.48, 1.7, 1.01], 0x9c68ff, { emissive: 0x8d78ff });
     liftCabin = cabin;
     liftCabin.position.y = liftTargetY;
   }
@@ -207,13 +234,15 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
       vendingScreen.material.color.setHex(0x63e3dc);
       onPreviewEvent({ message: outcome.message, type: 'success', state: vendingState });
     } else if (outcome.action === 'dispensed' && selectedProduct) {
-      selectedProduct.position.set(-0.25, -1.3, 0.94);
-      selectedProduct.material.emissive.setHex(0x000000);
-      selectedProduct.userData.available = false;
-      selectedProduct = null;
-      vendingState = outcome.state;
+      if (reducedMotion.matches) {
+        selectedProduct.position.set(-0.25, -1.3, 0.94);
+        selectedProduct.material.emissive.setHex(0x000000);
+        selectedProduct.userData.available = false;
+        selectedProduct = null;
+      } else dispenseMotion = { product: selectedProduct, from: selectedProduct.position.clone(), elapsed: 0 };
+      vendingState = reducedMotion.matches ? outcome.state : 'dispensing';
       vendingScreen.material.color.setHex(0x88ddb8);
-      onPreviewEvent({ message: `${outcome.message} Choose another item to continue.`, type: 'success', state: vendingState });
+      onPreviewEvent({ message: reducedMotion.matches ? `${outcome.message} Choose another item to continue.` : 'Dispensing product…', type: 'success', state: vendingState });
     } else {
       vendingState = outcome.state;
       onPreviewEvent({ message: outcome.message, type: 'hint', state: vendingState });
@@ -222,9 +251,27 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
     return vendingState;
   }
 
+  function resetVending() {
+    vendingSimulation?.reset();
+    clickTargets.filter((item) => item.userData.vendingProduct).forEach((item) => {
+      item.position.copy(item.userData.initialPosition);
+      item.userData.available = true;
+      item.material.emissive.setHex(0x000000);
+    });
+    selectedProduct = null;
+    dispenseMotion = null;
+    vendingState = 'idle';
+    if (vendingScreen) vendingScreen.material.color.setHex(0x4be0d0);
+    onPreviewEvent({ message: 'Vending machine reset. All products are available.', type: 'ready', state: vendingState });
+    draw();
+  }
+
   function requestElevatorFloor(floor) {
     if (!liftCabin || floor < 1 || floor > 3) return;
     liftTargetY = [-0.8, 0.45, 1.7][floor - 1];
+    liftButtons.forEach((button, index) => button.material.emissive.setHex(index + 1 === floor ? 0x9f65ff : 0x248c89));
+    liftDoors.forEach((door) => { door.userData.open = true; });
+    if (liftIndicator) liftIndicator.material.emissive.setHex(0x9f65ff);
     if (reducedMotion.matches) liftCabin.position.y = liftTargetY;
     onPreviewEvent({ message: `Elevator requested at floor ${floor}.`, type: 'success' });
     draw();
@@ -239,6 +286,21 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
     root.add(grid);
   }
 
+  function addAmbientGeometry() {
+    const colors = [0x9f87ff, 0x63e3dc, 0x83b7ff, 0xd2a1ff];
+    for (let index = 0; index < colors.length; index++) {
+      const node = new THREE.Mesh(new THREE.IcosahedronGeometry(0.115, 1), material(colors[index], { emissive: colors[index] }));
+      const baseY = 1.75 + (index % 2) * 0.38;
+      node.position.set(-3.05 + index * 1.8, baseY, -1.35);
+      root.add(node);
+      floaters.push({ node, baseY, phase: index * 1.4, speed: 0.75 + index * 0.12 });
+    }
+    for (let index = 0; index < 3; index++) {
+      const connector = line(root, [[-2.9 + index * 1.8, 1.75 + (index % 2) * 0.38, -1.35], [-1.1 + index * 1.8, 1.75 + ((index + 1) % 2) * 0.38, -1.35]], index % 2 ? 0x63e3dc : 0xa88bff, 0.6);
+      connectors.push(connector);
+    }
+  }
+
   function setChallenge(id) {
     if (disposed || !['parking-lot', 'vending-machine', 'elevator'].includes(id)) return;
     activeId = id;
@@ -247,6 +309,9 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
     if (id === 'parking-lot') addParkingLot();
     else if (id === 'vending-machine') addVendingMachine();
     else addElevator();
+    addAmbientGeometry();
+    parkingClock = 0;
+    parkingRunning = true;
     root.rotation.set(-0.12, -0.4, 0);
     root.scale.setScalar(reducedMotion.matches ? 1 : 0.86);
     scaleProgress = reducedMotion.matches ? 1 : 0;
@@ -269,13 +334,63 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
   function draw(time = performance.now()) {
     if (disposed || !visible) return;
     if (!reducedMotion.matches && !dragging) {
-      root.rotation.y += 0.000075 * Math.min(time - (lastFrame || time), 40);
+      const deltaMs = Math.min(time - (lastFrame || time), 40);
+      const delta = deltaMs / 1000;
+      root.rotation.y += 0.12 * delta;
+      root.rotation.x = THREE.MathUtils.damp(root.rotation.x, -0.12 + pointerParallax.y * 0.075, 3.5, delta);
+      root.rotation.y += pointerParallax.x * 0.0006 * deltaMs;
+      floaters.forEach(({ node, baseY, phase, speed }) => {
+        node.position.y = baseY + Math.sin(time * 0.001 * speed + phase) * 0.18;
+        node.rotation.x += delta * 0.45;
+        node.rotation.y += delta * 0.75;
+      });
+      connectors.forEach((connector, index) => {
+        const positions = connector.geometry.attributes.position;
+        positions.setY(0, floaters[index].node.position.y);
+        positions.setY(1, floaters[index + 1].node.position.y);
+        positions.needsUpdate = true;
+      });
+      ambientLight.intensity = 2.05 + (Math.sin(time * 0.0007) + 1) * 0.18;
       if (scaleProgress < 1) {
         scaleProgress = Math.min(1, scaleProgress + 0.055);
         const eased = 1 - (1 - scaleProgress) ** 3;
         root.scale.setScalar(0.86 + 0.14 * eased);
       }
-      if (liftCabin) liftCabin.position.y = THREE.MathUtils.damp(liftCabin.position.y, liftTargetY, 4.5, Math.min((time - (lastFrame || time)) / 1000, 0.05));
+      if (liftCabin) {
+        liftCabin.position.y = THREE.MathUtils.damp(liftCabin.position.y, liftTargetY, 3.2, delta);
+        const arrived = Math.abs(liftCabin.position.y - liftTargetY) < 0.035;
+        liftDoors.forEach((door) => {
+          const direction = Math.sign(door.userData.closedX - 0.05);
+          const targetX = door.userData.closedX + (door.userData.open && arrived ? direction * 0.22 : 0);
+          door.position.x = THREE.MathUtils.damp(door.position.x, targetX, 5, delta);
+          if (door.userData.open && arrived && Math.abs(door.position.x - targetX) < 0.02) door.userData.open = false;
+        });
+        if (liftIndicator && arrived) liftIndicator.material.color.setHex(0x63e3dc);
+      }
+      if (activeId === 'parking-lot' && parkingRunning) {
+        parkingClock += delta;
+        parkingCars.forEach(({ car, homeX, homeZ, offset }) => {
+          const phase = (parkingClock + offset) % 8;
+          const progress = phase < 2.5 ? phase / 2.5 : phase < 5 ? 1 : 1 - (phase - 5) / 3;
+          car.position.x = THREE.MathUtils.lerp(-3.05, homeX, THREE.MathUtils.clamp(progress, 0, 1));
+          car.position.z = homeZ + (phase > 5 ? -(phase - 5) * 0.55 : 0);
+          car.rotation.y = phase > 5 ? -0.08 : 0;
+        });
+      }
+      if (dispenseMotion) {
+        dispenseMotion.elapsed += delta;
+        const progress = Math.min(1, dispenseMotion.elapsed / 0.85);
+        const eased = 1 - (1 - progress) ** 3;
+        dispenseMotion.product.position.lerpVectors(dispenseMotion.from, new THREE.Vector3(-0.25, -1.3, 0.94), eased);
+        if (progress === 1) {
+          dispenseMotion.product.material.emissive.setHex(0x000000);
+          dispenseMotion.product.userData.available = false;
+          selectedProduct = null;
+          dispenseMotion = null;
+          vendingState = 'dispensed';
+          onPreviewEvent({ message: 'Product dispensed. Choose another item to continue.', type: 'success', state: vendingState });
+        }
+      }
     }
     renderer.render(scene, camera);
     lastFrame = time;
@@ -344,6 +459,10 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
     if (event.key === 'ArrowLeft') { event.preventDefault(); rotateBy(-0.22); }
     if (event.key === 'ArrowRight') { event.preventDefault(); rotateBy(0.22); }
   };
+  const onPointerParallax = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    pointerParallax = { x: (event.clientX - rect.left) / rect.width - 0.5, y: (event.clientY - rect.top) / rect.height - 0.5 };
+  };
   const onMotionChange = () => {
     stop();
     draw();
@@ -354,6 +473,7 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
   canvas.addEventListener('pointerup', onPointerUp);
   canvas.addEventListener('pointercancel', onPointerCancel);
   canvas.addEventListener('keydown', onKeyDown);
+  canvas.addEventListener('pointermove', onPointerParallax);
   reducedMotion.addEventListener?.('change', onMotionChange);
   const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
   const onWindowResize = () => resize();
@@ -368,8 +488,17 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
   return {
     setChallenge,
     selectParkingSpot,
+    toggleParking: () => { parkingRunning = !parkingRunning; return parkingRunning; },
+    resetParking: () => {
+      parkingClock = 0;
+      parkingCars.forEach(({ car, homeZ }) => car.position.set(-3.05, -0.27, homeZ));
+      parkingRunning = true;
+      draw();
+      start();
+    },
     selectVendingProduct,
     advanceVending,
+    resetVending,
     requestElevatorFloor,
     rotate: () => rotateBy(Math.PI / 4),
     dispose() {
@@ -383,6 +512,7 @@ export function createStudioScene(canvas, { onPreviewEvent = () => {} } = {}) {
       canvas.removeEventListener('pointerup', onPointerUp);
       canvas.removeEventListener('pointercancel', onPointerCancel);
       canvas.removeEventListener('keydown', onKeyDown);
+      canvas.removeEventListener('pointermove', onPointerParallax);
       reducedMotion.removeEventListener?.('change', onMotionChange);
       clearModel();
       for (const item of materialCache.values()) item.dispose();

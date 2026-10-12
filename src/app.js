@@ -10,6 +10,8 @@ let sceneLoad = null;
 let fallbackTurn = 0;
 let fallbackVending = new VendingPreview();
 let previewVendingState = 'idle';
+let parkingDemoRunning = true;
+let requestedFloor = null;
 let viewedAttempt = null;
 const $ = (selector) => document.querySelector(selector);
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
@@ -41,6 +43,8 @@ function renderProblem() {
   viewedAttempt = null;
   fallbackVending.reset();
   previewVendingState = 'idle';
+  parkingDemoRunning = true;
+  requestedFloor = null;
   $('#problem-level').textContent = problem.level;
   $('#problem-title').textContent = problem.title;
   $('#problem-summary').textContent = problem.summary;
@@ -91,16 +95,16 @@ function updateDraftProgress(draft) {
 function renderSceneActions(problem) {
   const actions = $('#scene-actions');
   if (problem.id === 'parking-lot') {
-    actions.innerHTML = `<button class="scene-action" type="button" data-preview-action="spot">Highlight available bay <span>↗</span></button>`;
+    actions.innerHTML = `<button class="scene-action" type="button" data-preview-action="spot">Highlight available bay <span>↗</span></button><button class="scene-action scene-action-secondary" type="button" data-preview-action="parking-toggle">${parkingDemoRunning ? 'Pause demo' : 'Resume demo'}</button><button class="scene-action scene-action-secondary" type="button" data-preview-action="parking-reset">Reset</button>`;
   } else if (problem.id === 'vending-machine') {
     const vendingState = studioScene ? previewVendingState : fallbackVending.state;
     const canSelect = vendingState === 'idle' || vendingState === 'dispensed';
     const canAdvance = vendingState === 'selected' || vendingState === 'paid';
     const selectLabel = vendingState === 'selected' ? 'Product selected' : vendingState === 'paid' ? 'Payment ready' : 'Choose product';
     const nextLabel = vendingState === 'selected' ? 'Simulate payment' : vendingState === 'paid' ? 'Dispense item' : 'Next step';
-    actions.innerHTML = `<button class="scene-action ${canSelect ? '' : 'is-current'}" type="button" data-preview-action="product" ${canSelect ? '' : 'disabled'}>${selectLabel}</button><button class="scene-action scene-action-secondary" type="button" data-preview-action="vending-next" ${canAdvance ? '' : 'disabled'}>${nextLabel}</button>`;
+    actions.innerHTML = `<button class="scene-action ${canSelect ? '' : 'is-current'}" type="button" data-preview-action="product" ${canSelect ? '' : 'disabled'}>${selectLabel}</button><button class="scene-action scene-action-secondary" type="button" data-preview-action="vending-next" ${canAdvance ? '' : 'disabled'}>${nextLabel}</button><button class="scene-action scene-action-secondary" type="button" data-preview-action="vending-reset">Reset</button>`;
   } else {
-    actions.innerHTML = `<span class="scene-action-label">CALL ELEVATOR</span>${[1, 2, 3].map((floor) => `<button class="scene-action scene-floor" type="button" data-floor="${floor}" aria-label="Request elevator at floor ${floor}">${floor}</button>`).join('')}`;
+    actions.innerHTML = `<span class="scene-action-label">CALL ELEVATOR</span>${[1, 2, 3].map((floor) => `<button class="scene-action scene-floor ${requestedFloor === floor ? 'is-current' : ''}" type="button" data-floor="${floor}" aria-label="Request elevator at floor ${floor}" aria-pressed="${requestedFloor === floor}">${floor}</button>`).join('')}`;
   }
 }
 
@@ -121,6 +125,7 @@ async function ensureScene() {
       }
     } });
     studioScene.setChallenge(activeId);
+    if (!parkingDemoRunning && activeId === 'parking-lot') studioScene.toggleParking();
     $('#scene-fallback').hidden = true;
     $('#scene-status').innerHTML = '<i></i> INTERACTIVE 3D';
     return studioScene;
@@ -300,6 +305,15 @@ $('#scene-actions').addEventListener('click', (event) => {
       $('#scene-feedback').textContent = outcome.message;
       renderSceneActions(activeProblem());
     }
+  } else if (button.dataset.previewAction === 'parking-toggle') {
+    parkingDemoRunning = studioScene ? studioScene.toggleParking() : !parkingDemoRunning;
+    $('#scene-feedback').textContent = parkingDemoRunning ? 'Parking demo resumed. Cars are entering and leaving the lot.' : 'Parking demo paused.';
+    renderSceneActions(activeProblem());
+  } else if (button.dataset.previewAction === 'parking-reset') {
+    parkingDemoRunning = true;
+    studioScene?.resetParking();
+    $('#scene-feedback').textContent = 'Parking demo reset. The vehicles will cycle through the bays again.';
+    renderSceneActions(activeProblem());
   } else if (button.dataset.previewAction === 'vending-next') {
     if (studioScene) studioScene.advanceVending();
     else {
@@ -308,10 +322,18 @@ $('#scene-actions').addEventListener('click', (event) => {
       $('#scene-feedback').textContent = outcome.message;
       renderSceneActions(activeProblem());
     }
+  } else if (button.dataset.previewAction === 'vending-reset') {
+    fallbackVending.reset();
+    previewVendingState = 'idle';
+    if (studioScene) studioScene.resetVending();
+    else $('#scene-feedback').textContent = 'Vending machine reset. All products are available.';
+    renderSceneActions(activeProblem());
   } else if (button.dataset.floor) {
     const floor = Number(button.dataset.floor);
+    requestedFloor = floor;
     if (studioScene) studioScene.requestElevatorFloor(floor);
     else $('#scene-feedback').textContent = `Elevator requested at floor ${floor}.`;
+    renderSceneActions(activeProblem());
   }
 });
 
@@ -333,6 +355,27 @@ document.addEventListener('keydown', (event) => {
 });
 
 renderProblem();
+document.documentElement.classList.add('motion-ready');
+const revealObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-revealed');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 }) : null;
+document.querySelectorAll('.brief-card, .design-card, .review-card, .history-card, .page-footer').forEach((element) => {
+  element.classList.add('scroll-reveal');
+  if (revealObserver) revealObserver.observe(element);
+  else element.classList.add('is-revealed');
+});
+const updateScrollProgress = () => {
+  const range = document.documentElement.scrollHeight - window.innerHeight;
+  document.documentElement.style.setProperty('--scroll-progress', `${range > 0 ? window.scrollY / range * 100 : 0}%`);
+};
+window.addEventListener('scroll', updateScrollProgress, { passive: true });
+window.addEventListener('resize', updateScrollProgress);
+updateScrollProgress();
 if ('IntersectionObserver' in window) {
   const sceneObserver = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting) {
