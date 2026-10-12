@@ -14,7 +14,7 @@ Blueprint is a focused low-level design practice studio. Choose a prompt, explai
 - Real score trend bars and review-driven revision targets based on each attempt's lowest rubric dimensions.
 - Six-part deterministic review with evidence cues and specific improvement prompts.
 - Presentation mode for the current draft or most recently reviewed submission.
-- Midnight Studio design, collapsible desktop rail, responsive mobile challenge picker, reduced-motion support, and draft readiness feedback.
+- Architecture studio design with a white drafting-paper canvas, collapsible desktop rail, responsive mobile challenge picker, reduced-motion support, and draft readiness feedback.
 
 ## Stack and architecture
 
