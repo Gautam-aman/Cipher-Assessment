@@ -210,7 +210,7 @@ function renderFeedback(evaluation) {
   const ringOffset = (circumference * (100 - evaluation.score) / 100).toFixed(2);
   $('#feedback-panel').innerHTML = `<div class="review-top"><div><span class="eyebrow">DESIGN REVIEW</span><h3>${strong >= 4 ? 'A solid foundation' : 'A useful first pass'}</h3></div><div class="score-ring" role="img" aria-label="Design review score: ${evaluation.score} out of 100"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="score-track" cx="20" cy="20" r="17"/><circle class="score-progress" cx="20" cy="20" r="17" stroke-dasharray="${circumference}" stroke-dashoffset="${ringOffset}" transform="rotate(-90 20 20)"/></svg><span>${evaluation.score}</span><small>/100</small></div></div>
     <p class="review-intro">A rubric based review of the evidence in your submission. Use each suggestion to shape your next attempt.</p>
-    <div class="criteria-list">${evaluation.criteria.map((item) => `<article class="criterion"><div class="criterion-head"><strong>${esc(item.label)}</strong><span>${item.score}<small> / 4</small></span></div><div class="score-bars">${[1,2,3,4].map((n) => `<i class="${n <= item.score ? 'filled' : ''}"></i>`).join('')}</div><p>${esc(item.feedback)}</p></article>`).join('')}</div>
+    <div class="criteria-list">${evaluation.criteria.map((item) => `<article class="criterion"><div class="criterion-head"><strong>${esc(item.label)}</strong><span>${item.score}<small> / 4</small></span></div><div class="score-bars" role="img" aria-label="${item.score} out of 4 rubric signals">${[1,2,3,4].map((n) => `<i class="${n <= item.score ? 'filled' : ''}"></i>`).join('')}</div>${item.evidence.length ? `<details class="criterion-evidence"><summary>Evidence from your draft <span>${item.evidence.length}</span></summary><ul>${item.evidence.map((excerpt) => `<li>“${esc(excerpt)}”</li>`).join('')}</ul></details>` : '<div class="criterion-no-evidence">No direct evidence found in this section yet.</div>'}<p>${esc(item.feedback)}</p></article>`).join('')}</div>
     <div class="review-footnote"><span>ⓘ</span> Scores reflect rubric evidence, not a single “correct” design. This prototype uses deterministic keyword checks; human or AI review can plug into the same evaluation contract.</div>`;
 }
 
@@ -330,30 +330,36 @@ $('#new-attempt').addEventListener('click', () => {
   revisionBaseAttemptId = null;
   for (const field of ['requirements', 'classes', 'relationships', 'tradeoffs']) $(`#${field}-input`).value = '';
   state.drafts[activeId] = { requirements: '', classes: '', relationships: '', tradeoffs: '' };
-  save();
+  const persisted = save();
   renderEmptyReview();
   $('#draft-status').textContent = 'READY TO DESIGN';
   updateDraftProgress(state.drafts[activeId]);
   setPracticeStep('choose');
+  if (!persisted) announce('Fresh draft is ready for this session; browser storage is unavailable.');
   $('#requirements-input').focus();
 });
 
 $('#clear-history').addEventListener('click', () => {
+  if (!window.confirm(`Clear all saved attempts for ${activeProblem().title}? This cannot be undone.`)) return;
   state.attempts = [];
   viewedAttempt = null;
-  save();
+  revisionBaseAttemptId = null;
+  const persisted = save();
   renderProblems();
   renderHistory();
   renderRevisionPanel();
-  announce('Attempt history cleared.');
+  announce(persisted ? 'Attempt history cleared.' : 'History cleared for this session; browser storage is unavailable.');
 });
 
 $('#revision-focus').addEventListener('input', (event) => {
   state.revisions.focuses[activeId] = event.currentTarget.value;
-  const saved = save();
-  $('#revision-save-status').textContent = saved ? 'Saved for this challenge' : 'Could not save in this browser';
-  $('#revision-save-status').classList.toggle('save-error', !saved);
+  updateRevisionSaveStatus(save());
 });
+
+function updateRevisionSaveStatus(saved, successText = 'Saved for this challenge') {
+  $('#revision-save-status').textContent = saved ? successText : 'Session only · browser storage unavailable';
+  $('#revision-save-status').classList.toggle('save-error', !saved);
+}
 
 $('#key-note-form').addEventListener('submit', (event) => {
   event.preventDefault();
@@ -364,8 +370,9 @@ $('#key-note-form').addEventListener('submit', (event) => {
   notes.unshift({ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() });
   state.revisions.notes[activeId] = notes;
   input.value = '';
-  save();
+  const saved = save();
   renderRevisionPanel();
+  updateRevisionSaveStatus(saved, 'Key note saved for this challenge');
   input.focus();
 });
 
@@ -373,8 +380,9 @@ $('#key-note-list').addEventListener('click', (event) => {
   const button = event.target.closest('[data-delete-note]');
   if (!button) return;
   state.revisions.notes[activeId] = (state.revisions.notes[activeId] ?? []).filter((note) => note.id !== button.dataset.deleteNote);
-  save();
+  const saved = save();
   renderRevisionPanel();
+  updateRevisionSaveStatus(saved, 'Key note removed for this challenge');
 });
 
 $('#revision-load').addEventListener('click', () => {
@@ -385,14 +393,14 @@ $('#revision-load').addEventListener('click', () => {
   viewedAttempt = null;
   for (const field of ['requirements', 'classes', 'relationships', 'tradeoffs']) $(`#${field}-input`).value = attempt.submission[field] ?? '';
   state.drafts[activeId] = collectDraft();
-  save();
+  const persisted = save();
   updateDraftProgress(state.drafts[activeId]);
   setPracticeStep('design');
   $('#draft-status').textContent = `REVISING ATTEMPT ${attempt.number}`;
   renderRevisionPanel();
   $('#requirements-input').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
   $('#requirements-input').focus({ preventScroll: true });
-  announce(`Attempt ${attempt.number} loaded as a new revision. The original is preserved.`);
+  announce(`Attempt ${attempt.number} loaded as a new revision${persisted ? '' : ' for this session only'}. The original is preserved.`);
 });
 
 $('#sidebar-toggle').addEventListener('click', (event) => {

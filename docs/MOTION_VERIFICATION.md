@@ -21,7 +21,7 @@ The Three.js preview now advances at about 30 frames per second while visible an
 
 ## Checks run
 
-- `npm test`: 9 passed, 0 failed. This includes the vending state machine but does not test WebGL.
-- `node --check src/app.js` and `node --check src/scene.js`: passed.
+- `npm test`: 14 passed, 0 failed on the latest recorded run. This includes rubric, storage, and vending logic but does not test WebGL or canvas pointer interactions.
+- `node --check` for all modules in `src/` and `server.mjs`: passed on the latest recorded run.
 - Local HTTP smoke check previously confirmed the app and locally served Three.js modules return HTTP 200. It does not verify rendering.
-- No browser executable or browser automation tool is available in this environment. Console output, multi-frame pixel comparisons, viewport behavior, and reduced-motion behavior therefore remain unverified in a real browser.
+- Safari is installed, but Safari WebDriver session creation fails until “Allow remote automation” is enabled in Safari settings. Console output, multi-frame pixel comparisons, viewport behavior, and reduced-motion behavior therefore remain unverified in a real browser.

@@ -1113,3 +1113,9 @@ button:focus-visible,a:focus-visible { outline-color: #256f91; }
   .hld-canvas-prompt { max-width: calc(100% - 16px); font-size: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .hld-tool-group button { transition: none; } }
+.criterion-evidence { margin-top: 8px; color: #526985; }
+.criterion-evidence summary { width: max-content; max-width: 100%; cursor: pointer; color: #4564b6; font-size: 9px; font-weight: 600; }
+.criterion-evidence summary span { margin-left: 4px; color: #8390a2; font-weight: 400; }
+.criterion-evidence ul { margin: 7px 0 0; padding: 0; display: grid; gap: 5px; list-style: none; }
+.criterion-evidence li { padding: 7px 9px; border-left: 2px solid #7990c8; background: #f6f8fc; color: #52647a; font-size: 9px; line-height: 1.55; }
+.criterion-no-evidence { margin-top: 7px; color: #9a7b5b; font-size: 9px; font-style: italic; }

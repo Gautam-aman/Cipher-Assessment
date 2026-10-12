@@ -141,6 +141,20 @@ export function createHldStudio(root, initialProblemId) {
     render(); persist();
   }
 
+  function connectNode(nodeId) {
+    if (!connectFrom) {
+      connectFrom = nodeId;
+      selectedId = nodeId;
+      svg.focus({ preventScroll: true });
+      render();
+    } else if (connectFrom !== nodeId && !model.edges.some((edge) => edge.from === connectFrom && edge.to === nodeId)) {
+      snapshot();
+      model.edges.push({ id: id(), from: connectFrom, to: nodeId });
+      connectFrom = null; mode = 'select';
+      render(); persist();
+    }
+  }
+
   root.addEventListener('click', (event) => {
     const tool = event.target.closest('[data-hld-tool]');
     if (tool) {
@@ -156,10 +170,7 @@ export function createHldStudio(root, initialProblemId) {
     if (event.target === svg && selectedId) { selectedId = null; render(); return; }
     if (mode === 'connect' && event.target.closest('[data-node]')) {
       const nodeId = event.target.closest('[data-node]').dataset.node;
-      if (!connectFrom) { connectFrom = nodeId; selectedId = nodeId; render(); }
-      else if (connectFrom !== nodeId && !model.edges.some((edge) => edge.from === connectFrom && edge.to === nodeId)) {
-        snapshot(); model.edges.push({ id: id(), from: connectFrom, to: nodeId }); connectFrom = null; mode = 'select'; render(); persist();
-      }
+      connectNode(nodeId);
     }
   });
 
@@ -197,8 +208,28 @@ export function createHldStudio(root, initialProblemId) {
     if (node && label?.trim()) { snapshot(); node.label = label.trim().slice(0, 40); selectedId = node.id; render(); persist(); }
   });
   root.addEventListener('keydown', (event) => {
+    const nodeGroup = event.target.closest?.('[data-node]');
+    if (nodeGroup && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      if (mode === 'connect') connectNode(nodeGroup.dataset.node);
+      else { selectedId = nodeGroup.dataset.node; svg.focus({ preventScroll: true }); render(); }
+      return;
+    }
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') { event.preventDefault(); undo(); return; }
-    if ((event.key === 'Delete' || event.key === 'Backspace') && selectedId && !/INPUT|TEXTAREA/.test(event.target.tagName)) {
+    const canvasKeyTarget = event.target === svg || Boolean(nodeGroup);
+    if (canvasKeyTarget && selectedId && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      const node = model.nodes.find((item) => item.id === selectedId);
+      if (!node) return;
+      event.preventDefault(); snapshot();
+      const step = event.shiftKey ? 16 : 8;
+      if (event.key === 'ArrowLeft') node.x = Math.max(12, node.x - step);
+      if (event.key === 'ArrowRight') node.x = Math.min(W - node.w - 12, node.x + step);
+      if (event.key === 'ArrowUp') node.y = Math.max(12, node.y - step);
+      if (event.key === 'ArrowDown') node.y = Math.min(H - node.h - 12, node.y + step);
+      render(); persist();
+      return;
+    }
+    if ((event.key === 'Delete' || event.key === 'Backspace') && selectedId && canvasKeyTarget) {
       snapshot(); model.nodes = model.nodes.filter((node) => node.id !== selectedId); model.edges = model.edges.filter((edge) => edge.from !== selectedId && edge.to !== selectedId); selectedId = null; render(); persist();
     }
     if (event.key === 'Escape' && (connectFrom || mode !== 'select')) { connectFrom = null; mode = 'select'; render(); }
@@ -206,7 +237,8 @@ export function createHldStudio(root, initialProblemId) {
 
   function exportSvg() {
     const copy = svg.cloneNode(true);
-    const styles = `<style>.hld-paper{fill:#fcfcfa}.hld-edge-line{fill:none;stroke:#4865bd;stroke-width:2;stroke-linecap:round;stroke-dasharray:8 5}.hld-edge-shadow{fill:none;stroke:#4865bd33;stroke-width:5;stroke-linecap:round}.hld-node-shape{fill:#f2f5ff;stroke:#4966bd;stroke-width:2;stroke-linejoin:round}.hld-node-echo{fill:none;stroke:#4966bd66;stroke-width:1}.hld-node-type{fill:#718096;font:10px monospace;letter-spacing:1.5px}.hld-node-label{fill:#26374e;font:600 18px sans-serif}.hld-node-dot{fill:#4966bd}</style>`;
+    copy.querySelectorAll('.hld-selection').forEach((selection) => selection.remove());
+    const styles = `<style>.hld-paper{fill:#fcfcfa}.hld-edge-line{fill:none;stroke:#4865bd;stroke-width:2;stroke-linecap:round;stroke-dasharray:8 5}.hld-edge-shadow{fill:none;stroke:#4865bd33;stroke-width:5;stroke-linecap:round}.hld-node-shape{fill:#f2f5ff;stroke:#4966bd;stroke-width:2;stroke-linejoin:round}.hld-node-echo{fill:none;stroke:#4966bd66;stroke-width:1}.hld-node-type{fill:#718096;font:10px monospace;letter-spacing:1.5px}.hld-node-label{fill:#26374e;font:600 18px sans-serif}.hld-node-dot{fill:#4966bd}.hld-node.teal .hld-node-shape{fill:#edf8f6;stroke:#348c87}.hld-node.teal .hld-node-echo{stroke:#348c8766}.hld-node.teal .hld-node-dot{fill:#348c87}.hld-node.amber .hld-node-shape{fill:#fff7e8;stroke:#b8883d}.hld-node.amber .hld-node-echo{stroke:#b8883d66}.hld-node.amber .hld-node-dot{fill:#b8883d}.hld-node.rose .hld-node-shape{fill:#fff3f4;stroke:#b46d7d}.hld-node.rose .hld-node-echo{stroke:#b46d7d66}.hld-node.rose .hld-node-dot{fill:#b46d7d}.hld-node.violet .hld-node-shape{fill:#f7f1ff;stroke:#8260b8}.hld-node.violet .hld-node-echo{stroke:#8260b866}.hld-node.violet .hld-node-dot{fill:#8260b8}.hld-node.sand .hld-node-shape{fill:#fff8ee;stroke:#bf8f51}.hld-node.sand .hld-node-echo{stroke:#bf8f5166}.hld-node.sand .hld-node-dot{fill:#bf8f51}</style>`;
     copy.insertAdjacentHTML('afterbegin', styles);
     copy.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     const blob = new Blob([new XMLSerializer().serializeToString(copy)], { type: 'image/svg+xml' });

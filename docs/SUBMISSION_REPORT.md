@@ -1,32 +1,32 @@
-# Submission report
+# Submission readiness report
 
-## What was built
+## Product scope
 
-Blueprint is a single-screen LLD practice studio with three prompts, structured text design notes, local autosave, deterministic feedback over six design dimensions, and browser-local attempt history. Each challenge includes a lazy-loaded procedural Three.js preview with purposeful motion and button controls that also work through a non-WebGL fallback. The vending machine demonstrates selection, simulated payment, animated dispensing, and reset; the elevator moves between floors and animates its doors; the parking demo cycles vehicles through bays with pause and reset controls. Scroll reveals and a document progress line add motion to the workspace. See [motion verification](MOTION_VERIFICATION.md) for implementation details and browser verification limits.
+Blueprint is a browser-local LLD practice studio with three prompts, a structured four-part design form, draft autosave, six-part deterministic review, attempt history, revision focus, and per-challenge key notes. Its separate HLD canvas provides challenge starter diagrams, move/connect/rename/delete/undo, autosave, and SVG export. HLD diagrams are not attached to LLD attempts or evaluated. The interface uses a white architecture-studio visual system and a reduced-motion path.
 
-The interface now follows the Midnight Studio direction: deep navy and charcoal surfaces, violet-to-cyan accents, an atmospheric design-loop hero, challenge mission cards with real attempt status, a collapsible desktop rail, horizontal small-screen challenge navigation, and editor section readiness feedback. Motion is transition-led and reduced-motion aware. See [the design audit](DESIGN_AUDIT.md).
+**Demo URL provided by the project owner:** [https://inspiring-zuccutto-2bff94.netlify.app/](https://inspiring-zuccutto-2bff94.netlify.app/). The URL returned HTTP 200 during this review and contains the canvas/revision UI. However, its served `src/evaluation.js` still has the former global `text.includes(term)` scorer; it does not match the improved local working tree. Re-deploy the current tree before presenting the live site.
 
-## Engineering decisions
+## Engineering and verification
 
-- Kept the app a static monolith with small modules because the assignment prioritizes LLD domain boundaries over infrastructure.
-- Separated prompt content, pure validation/evaluation, UI coordination, and persistence.
-- Stored immutable attempt snapshots before displaying feedback.
-- Returned evidence and next-step guidance per rubric criterion instead of presenting an unexplained score.
-- Avoided credentials and backend infrastructure. Three.js is the only runtime package dependency and is served locally.
-- Added a concise frontend audit and design plan in `docs/DESIGN_AUDIT.md`.
+- Content, validation/evaluation, persistence, vending state machine, 3D previews, and HLD editor have separate modules.
+- The evaluator now checks challenge-specific requirement cues, rubric-relevant answer sections, and displays matching answer excerpts. It remains lexical and can miss synonyms or reward a cue without sound design reasoning.
+- `npm test`: **14 passed, 0 failed** on the recorded run. Tests cover submission validation, score signals and section separation, persistence errors/round-tripping, and vending state transitions.
+- `node --check` for each `src/*.js` module and `server.mjs`: passed on the recorded run.
+- `git diff --check`: passed on the recorded run.
+- `npm audit --omit=dev --audit-level=moderate`: **0 vulnerabilities** in production dependencies.
+- Interactive browser workflows, WebGL motion, narrow-screen layout, canvas dragging/connecting, exported SVG rendering, and browser console behavior remain unverified. Safari WebDriver is installed but session creation is disabled until “Allow remote automation” is enabled in Safari settings. Run these checks manually before a live assessment.
+- No production build or deployment command exists; the app is served as native modules by `server.mjs`. Data is localStorage scoped to one browser profile.
 
-## Verification
+## Assessment risks still visible
 
-- `npm test`: **9 passed, 0 failed**. Covers evaluation, storage behavior, and the vending purchase state machine.
-- `node --check src/app.js`, `src/scene.js`, `src/vending.js`, and `server.mjs`: **passed**.
-- Local HTTP smoke check on port 4181: **passed**. The page, stylesheet, app, scene, vending model, and locally served Three.js module returned HTTP 200 with expected MIME types.
-- No production build command is configured; this is a native JavaScript static app served directly by `server.mjs`.
-- Interactive browser workflow, screenshots, and visual checks at desktop/tablet/mobile sizes: **not verified** because no browser-control tool or local browser executable is available in this environment. Responsive breakpoints were reviewed in source.
+1. **The live deployment is behind the local tree.** It still serves the old substring-based evaluator. Redeploy and confirm the deployed source before the candidate demo.
+2. **Browser-level proof is missing.** Automated tests do not exercise the end-to-end UI or new HLD pointer interactions; this is the largest remaining verification gap after deployment parity.
+3. **AI usage packaging.** The assessment analysis records a requirement for a separate `AI_USAGE.md`, but the candidate asked for that content to be combined into `README.md`. Confirm the grader accepts the merged format.
+4. **HLD attempt boundary.** Diagrams autosave separately and do not travel with an attempt, review, or presentation. The demo must not imply they are graded or historically snapshotted.
+5. **Heuristic review.** The deterministic evaluator is explainable, tested, and labeled, but is not semantic assessment of design quality.
 
-## Limitations
+## Candidate presentation
 
-The evaluator is deterministic and cue-based, not semantic. History is local to one browser. Submissions are text only. The vending interaction simulates payment without a payment system. There is no deployed URL or cross-device account.
+Demonstrate the full LLD loop with one prompt, one incomplete attempt, one completed attempt, evidence excerpts, history reopen, and a new revision. Then demonstrate the HLD board separately and clearly explain that diagrams are saved per challenge but are not part of the scored attempt. Explain the trade-off behind local-only storage and lexical evaluation.
 
-## Submission instructions
-
-Run `npm start`, then `npm test`. Submit the completed assessment through the Google Form linked in the assessment document. No form response or deployment is claimed by this report.
+The project does not submit the candidate's work to the external assessment form.

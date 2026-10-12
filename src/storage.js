@@ -1,7 +1,8 @@
 const KEY = 'blueprint.practice.v1';
 
-export function loadState(storage = globalThis.localStorage) {
+export function loadState(storage) {
   try {
+    if (arguments.length === 0) storage = globalThis.localStorage;
     const raw = storage?.getItem(KEY);
     if (!raw) return { attempts: [], drafts: {}, revisions: { focuses: {}, notes: {} } };
     const parsed = JSON.parse(raw);
@@ -19,8 +20,10 @@ export function loadState(storage = globalThis.localStorage) {
   }
 }
 
-export function saveState(state, storage = globalThis.localStorage) {
+export function saveState(state, storage) {
   try {
+    if (arguments.length === 0) storage = globalThis.localStorage;
+    if (!storage || typeof storage.setItem !== 'function') return false;
     storage?.setItem(KEY, JSON.stringify(state));
     return true;
   } catch {

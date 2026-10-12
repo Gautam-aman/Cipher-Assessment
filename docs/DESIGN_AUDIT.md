@@ -1,22 +1,25 @@
-# Design audit — Midnight Studio
+# Design audit — Architecture studio
 
-## Existing app
+## Current experience
 
-- **Screens/routes:** one responsive practice screen; no router or secondary route.
-- **Structure:** semantic HTML template, one native JS module coordinating view state, small problem/evaluation/storage modules, a procedural WebGL scene module, and one tokenized stylesheet.
-- **Dependencies:** Three.js for procedural preview geometry; Node built-in static server and test runner. No React or animation library, so native CSS motion and Three.js are used directly.
-- **Workflows:** choose one of three problems → explore its model → write four-part text design → deterministic rubric review → inspect a presentation view → revisit local attempt history / begin again. Drafts and attempts use versioned localStorage.
-- **Assessment constraints:** preserve problem context, meaningful submission, submission status, explainable non-canonical feedback, history, extensible evaluator boundary, research/design docs, and tests. This stays a small local monolith.
+- One responsive practice workspace with three LLD challenges and challenge-specific 3D previews.
+- Four-part structured text editor, readiness feedback, local drafts, deterministic rubric review, attempt history, revision focus, and key notes.
+- A distinct HLD board with prefilled component-flow examples, draggable SVG nodes, directed connectors, rename/delete/undo, local autosave, and SVG export.
+- White drafting-paper surfaces, graphite type, measured grid lines, and cobalt/teal accents. Motion is present in the hero, gallery, model interactions, and state feedback; reduced-motion rules are present.
 
-## Main design issues
+## Engineering assessment
 
-Before this redesign, the app had a static hero illustration rather than a challenge preview and no presentation mode or keyboard shortcuts. The Midnight palette and mission cards existed, but needed to become an actual learning surface with real challenge-specific models. Feedback is intentionally deterministic and must remain labeled honestly.
+- The problem catalog, evaluator, persistence, vending state machine, Three.js scene, and HLD editor are separated into native modules.
+- Rubric scoring is section-aware and problem-specific for requirement coverage, with matching answer excerpts displayed to learners. The evaluator is still deterministic and lexical, not a semantic judge.
+- Learner text is escaped before dynamic HTML insertion. HLD labels are escaped before SVG insertion. Storage is browser-local and has no cross-device recovery.
 
-## Implementation plan
+## Open gaps that affect a live assessment
 
-1. Preserve the Midnight Studio visual system while turning the hero into a lazy-loaded Three.js preview.
-2. Procedurally model the three existing problems; enable drag/keyboard orbit, parking-bay highlight, vending purchase simulation, and elevator floor requests.
-3. Keep equivalent button-based preview actions and a static challenge illustration available when WebGL is unavailable.
-4. Add a presentation dialog over the current draft or a submitted attempt, plus keyboard shortcuts and focus handling.
-5. Keep local autosave, section readiness, rubric, history, reduced-motion handling, renderer pixel-ratio cap, offscreen pause, and resource disposal.
-6. Retest domain behavior, syntax, dependencies, and static serving. Browser screenshots depend on installed browser tooling.
+1. Browser workflows and the HLD pointer interactions have no automated end-to-end coverage. Verify them in a browser before the interview.
+2. The HLD board is not snapshotted with an LLD attempt and is not scored. Present it as a separate practice aid.
+3. The assessment asks for `AI_USAGE.md`, while the candidate requested that section be merged into README. Confirm the submission format is acceptable.
+4. Check that the hosted deployment matches this working tree; a URL alone is not proof of version parity.
+
+## Verification boundary
+
+Current repository verification is `npm test`, JavaScript syntax checks, and `git diff --check`. These do not prove rendering, pointer behavior, WebGL, responsive viewport fit, or production runtime behavior. Refer to [the readiness report](SUBMISSION_REPORT.md) for the current evidence and candidate demo plan.

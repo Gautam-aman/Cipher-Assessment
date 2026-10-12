@@ -9,7 +9,7 @@ Build a focused, demonstrable low-level design practice loop. Learners choose a 
 | ID | Requirement | Acceptance criteria |
 | --- | --- | --- |
 | F1 | Offer a small set of contextualized LLD problems. | At least three selectable prompts provide scope, requirements, and a change prompt. |
-| F2 | Let a learner create a meaningful attempt in one chosen format. | Structured text captures requirements/assumptions, classes/responsibilities, relationships/flow, and trade-offs/edge cases. |
+| F2 | Let a learner create a meaningful attempt in one chosen format. | The evaluated LLD submission captures requirements/assumptions, classes/responsibilities, relationships/flow, and trade-offs/edge cases. A separate HLD canvas supports visual practice but is not part of attempt scoring. |
 | F3 | Submit an attempt and expose its state. | Incomplete attempts are rejected with actionable missing-field guidance; valid attempts are saved as completed. |
 | F4 | Give useful, explainable design feedback. | Review presents criteria, scores, evidence, and actionable suggestions; it does not claim a canonical answer. |
 | F5 | Preserve and review attempt history. | Learner can see previous attempts and reopen a past review; can start a fresh attempt. |
@@ -39,7 +39,7 @@ The assessment specifies no mandatory language or framework. A buildless browser
 | Extensibility & engineering judgement | 10% | Evaluation result contract and separation of transport/UI, rules, content, and storage. |
 | Implementation quality | 10% | Small dependency-free app, responsive UI, safe text rendering, clear states. |
 | Testing & reliability | 5% | Automated domain tests cover invalid, valid, and whitespace submissions. |
-| AI usage | 5% | `AI_USAGE.md` records material suggestions, choices, and rationale. |
+| AI usage | 5% | The AI usage note records material suggestions, choices, and rationale. |
 
 ## Submission requirements
 
@@ -47,7 +47,7 @@ The assessment specifies no mandatory language or framework. A buildless browser
 - Concise design note covering MVP, user flow, classes/interfaces, evaluation, and trade-offs.
 - Working end-to-end prototype.
 - Tests for important behavior and failure/edge cases.
-- README and AI_USAGE.md.
+- README and AI usage note. The candidate requested these be combined into one `README.md`; this preserves the content but may not satisfy an evaluator that checks for a separate `AI_USAGE.md` filename.
 - Submit completed work using the Google Form linked in the assessment. (External submission is not performed from this workspace.)
 
 ## Requirement-to-implementation traceability
@@ -55,16 +55,16 @@ The assessment specifies no mandatory language or framework. A buildless browser
 | ID | Implementation | Verification | Acceptance |
 | --- | --- | --- | --- |
 | F1 | `src/problems.js`, problem picker and brief in `index.html` / `src/app.js` | Manual workflow + problem data review | Three distinct prompts expose requirements and an extension. |
-| F2 | `index.html` structured form, autosave in `src/app.js`, `src/storage.js` | Manual workflow + reload check | Four sections capture a meaningful text design and browser draft is retained. |
+| F2 | `index.html` structured form, `src/hld.js`, autosave in `src/app.js` | Domain tests + manual browser workflow required | Four LLD text sections are evaluated. HLD canvas is separately saved and exported, but not attached to attempts. |
 | F3 | `src/evaluation.js` validation; submit handler in `src/app.js` | `npm test` + manual incomplete/complete submission | Missing sections give feedback; valid submission creates a completed attempt. |
-| F4 | `src/evaluation.js` and `renderFeedback` in `src/app.js` | `npm test` + manual review inspection | Six criteria display evidence-linked score and suggestion. |
+| F4 | `src/evaluation.js` and `renderFeedback` in `src/app.js` | Rubric unit tests + manual review inspection required | Six section-aware criteria show score, matching draft excerpts, and a targeted next step. Cues remain lexical rather than semantic. |
 | F5 | `src/storage.js`, history rendering and handlers in `src/app.js` | Manual repeat/reopen/reload check | Attempts persist locally and past review can be revisited. |
 | F6 | `src/problems.js`, `src/evaluation.js`, `src/storage.js`, `src/app.js` | Code review + tests | Content, rubric, persistence, and view code remain independently replaceable. |
 
 ## Risks and assumptions
 
-- The MVP uses structured text rather than code or a diagram. This is sufficient to capture intent, ownership, collaboration, and reasoning within the time boundary.
-- The evaluator uses deterministic rubric cues, not an LLM. It is transparent and works offline, but lexical cues can miss equivalent wording or reward keywords without semantic quality. Feedback explicitly describes this limitation.
+- LLD attempts use structured text; the additional HLD canvas is a separately saved artifact and is not included in attempt snapshots, review, or presentation mode.
+- The evaluator uses deterministic, section-aware rubric cues and displays matching excerpts, not an LLM. It is transparent and works offline, but lexical cues can miss equivalent wording or reward a cue without semantic quality. Feedback explicitly describes this limitation.
 - Attempts and drafts are local to one browser profile/device. No account, sync, or server persistence is required by the brief.
 - Evaluation completes synchronously in the prototype. The state/result contract admits `submitted`, `evaluating`, `completed`, and `failed` if slow external evaluation is later introduced.
 - Research is a brief product scan, not a comprehensive market study; source claims are limited to what publicly available product pages describe.

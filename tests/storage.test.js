@@ -12,6 +12,20 @@ test('reports storage write failure rather than claiming persistence', () => {
   assert.equal(saveState({ attempts: [], drafts: {} }, storage), false);
 });
 
+test('treats absent and inaccessible browser storage as unavailable', () => {
+  assert.equal(saveState({ attempts: [], drafts: {} }, null), false);
+  assert.deepEqual(loadState(null), { attempts: [], drafts: {}, revisions: { focuses: {}, notes: {} } });
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  try {
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('storage blocked'); } });
+    assert.deepEqual(loadState(), { attempts: [], drafts: {}, revisions: { focuses: {}, notes: {} } });
+    assert.equal(saveState({ attempts: [], drafts: {} }), false);
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, 'localStorage', descriptor);
+    else delete globalThis.localStorage;
+  }
+});
+
 test('round-trips a saved draft and attempt collection', () => {
   const values = new Map();
   const storage = { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };

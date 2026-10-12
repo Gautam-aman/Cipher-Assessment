@@ -6,15 +6,15 @@ Low-level design practice asks a learner to turn a prompt into objects, responsi
 
 ## A small scan of existing approaches
 
-**LLDCanvas** presents a broad, purpose-built toolkit: curated practice problems, visual UML editing, pattern support, timed practice, and code execution. Its breadth suggests that learners value both a blank-canvas practice environment and tools that represent structure. For a two-day MVP, reproducing a full diagram editor would consume effort before demonstrating the feedback loop, so Blueprint narrows the input to structured design notes. [LLDCanvas overview](https://www.lldcanvas.in/about) · [Features](https://www.lldcanvas.in/features)
+**LLDCanvas** presents a broad, purpose-built toolkit: curated practice problems, visual UML editing, pattern support, timed practice, and code execution. Its breadth suggests learners value tools that represent structure. Blueprint now includes a focused HLD sketch board while keeping its assessed LLD submission in structured text; it does not attempt to reproduce UML/code execution or submit diagrams to the rubric. [LLDCanvas overview](https://www.lldcanvas.in/about) · [Features](https://www.lldcanvas.in/features)
 
 **Educative's Grokking the Low Level Design Interview Using OOD Principles** is a guided course for learning OOD concepts. A course can teach and demonstrate a model, while repeated independent attempts need a lightweight space to articulate a learner's own design. Blueprint complements this practice mode rather than trying to recreate a course catalog. [Educative course](https://www.educative.io/courses/grokking-the-low-level-design-interview-using-ood-principles)
 
-**CoderPad Drawing Mode** supports collaborative drawing during interviews. This demonstrates the value of visual modeling in a live interaction, while also highlighting that a solo practice tool can start with less interaction overhead. Blueprint uses text to capture the design and its rationale in a portable, reviewable form; diagram support is a future submission adapter. [CoderPad Drawing Mode documentation](https://coderpad.io/resources/docs/interview/drawing-mode/)
+**CoderPad Drawing Mode** supports collaborative drawing during interviews. This demonstrates the value of visual modeling in a live interaction, while also highlighting that a solo practice tool can start with less interaction overhead. Blueprint's canvas is browser-local and single-user; structured text remains the format reviewed by its rubric. [CoderPad Drawing Mode documentation](https://coderpad.io/resources/docs/interview/drawing-mode/)
 
 ## Gap and product direction
 
-These approaches span broad toolkits, guided instruction, and live collaborative drawing. The focused gap for this prototype is a deliberate solo learning loop that retains the learner's explanation and makes the feedback criteria visible. The MVP offers three familiar problems; a structured written design; one extension prompt per problem; a stable six-part rubric; and an attempt history. It does not attempt to be a course, a diagramming canvas, or a general interview platform.
+These approaches span broad toolkits, guided instruction, and live collaborative drawing. The focused product is a deliberate solo learning loop that retains the learner's explanation and makes feedback criteria visible. It combines three familiar problems, a structured written design, one extension prompt per problem, a six-part rubric, attempt history, revision notes, and a lightweight HLD canvas. It does not attempt to be a course or a general interview platform.
 
 ## Feedback and evaluation choice
 
@@ -22,4 +22,4 @@ Completeness and state transitions are deterministic. Quality feedback is repres
 
 ## Limitations
 
-This is a short product scan based on public product descriptions, not hands-on evaluation of every tool or independent learner research. The implementation has no account or cross-device history, no diagram/code editor, and no semantic evaluator. These omissions protect the assignment's stated scope while leaving explicit seams for later experiments.
+This is a short product scan based on public product descriptions, not hands-on evaluation of every tool or independent learner research. The implementation has no account or cross-device history, no code editor, and no semantic evaluator. HLD diagrams are not part of reviewed LLD attempt snapshots. These limits should be explicit when demonstrating the product.
