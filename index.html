@@ -30,8 +30,8 @@
       <div class="sidebar-bottom"><span class="privacy-icon">◉</span><span class="sidebar-foot-copy">Saved privately in this browser</span></div>
     </aside>
     <main id="main-content" class="main-content">
-      <section class="welcome-row hero-panel">
-        <div class="hero-copy"><div class="overline"><span class="overline-line"></span> BLUEPRINT <span class="overline-slash">/</span> PRACTICE MODE</div><h1>Think in systems.<br><em>Design with intent.</em></h1><p class="welcome-sub">A focused space to shape your ideas, test your trade-offs, and sharpen your design instincts.</p><a class="hero-cta" href="#requirements-input">Enter the studio <span>↗</span></a><div class="hero-proof"><span><i class="proof-dot"></i> 3 design missions</span><b>·</b><span>One thoughtful iteration at a time</span></div></div>
+      <section class="welcome-row hero-panel" aria-labelledby="hero-title">
+        <div class="hero-copy"><div class="overline"><span class="overline-line"></span> BLUEPRINT <span class="overline-slash">/</span> PRACTICE MODE</div><h1 id="hero-title"><span class="hero-line"><span>THINK.</span></span><span class="hero-line"><span>DESIGN.</span></span><span class="hero-line hero-line-accent"><span>EVOLVE.</span></span></h1><p class="welcome-sub">A design practice for people who think in systems. Make the trade-offs visible. Get sharper with every iteration.</p><a class="hero-cta magnetic-button" href="#workspace-form">Start designing <span>↗</span></a><div class="hero-proof"><span><i class="proof-dot"></i> 3 design missions</span><b>·</b><span>One thoughtful iteration at a time</span></div></div>
         <div class="hero-art">
           <div class="art-caption"><span id="scene-label">PARKING LOT / SYSTEM MODEL</span><span id="scene-status" class="art-live"><i></i> 3D PREVIEW</span></div>
           <div id="scene-stage" class="scene-stage"><canvas id="scene-canvas" role="img" tabindex="0" aria-label="Interactive 3D parking lot model. Drag to rotate; use arrow keys to turn the view." hidden></canvas><div id="scene-fallback" class="scene-fallback"><div id="scene-fallback-visual" class="fallback-visual"><span id="fallback-art" class="fallback-art"></span><i></i><i></i></div><strong id="fallback-title">Parking lot</strong><small id="fallback-description">Multi-level parking structure with a highlighted available spot.</small></div></div>
@@ -40,6 +40,11 @@
         </div>
         <div class="loop" aria-label="Practice loop: choose, design, submit, reflect"><span id="step-choose" class="loop-step loop-active">01 <small>CHOOSE</small></span><b>·</b><span id="step-design" class="loop-step">02 <small>DESIGN</small></span><b>·</b><span id="step-reflect" class="loop-step">03 <small>REFLECT</small></span></div>
       </section>
+      <section class="challenge-gallery-section" aria-labelledby="gallery-title">
+        <div class="gallery-heading"><div><span class="section-kicker">THE DESIGN GYM / 01—03</span><h2 id="gallery-title">Pick a problem.<br><em>Find its shape.</em></h2></div><p>Three familiar systems. Infinite ways to reason about them.</p></div>
+        <div id="challenge-gallery" class="challenge-gallery" role="list" aria-label="Choose a design challenge"></div>
+      </section>
+      <div class="concept-marquee" aria-label="Practice concepts"><div class="marquee-track"><span>OBJECTS & RESPONSIBILITIES <i>✳</i> CLASS RELATIONSHIPS <i>✳</i> DESIGN TRADE-OFFS <i>✳</i> EDGE CASES <i>✳</i> TESTABLE SYSTEMS <i>✳</i></span><span aria-hidden="true">OBJECTS & RESPONSIBILITIES <i>✳</i> CLASS RELATIONSHIPS <i>✳</i> DESIGN TRADE-OFFS <i>✳</i> EDGE CASES <i>✳</i> TESTABLE SYSTEMS <i>✳</i></span></div></div>
       <div class="work-grid">
         <section class="work-column" aria-label="Problem and design workspace">
           <article class="brief-card">
@@ -67,6 +72,18 @@
         </section>
         <aside class="review-column" aria-label="Design feedback and attempt history">
           <section class="review-card"><div class="review-heading"><div><div class="section-caption"><span>03</span> REFLECT & IMPROVE</div><h2>Design review</h2></div><span class="review-spark">✳</span></div><div id="feedback-panel" aria-live="polite"><div class="feedback-empty"><div class="empty-icon">↗</div><strong>Your review appears here</strong><p>Submit a design to get evidence-based feedback across six dimensions.</p></div></div></section>
+          <section class="revision-card" aria-labelledby="revision-title">
+            <div class="revision-heading"><div><div class="section-caption"><span>05</span> REVISIT YOUR REASONING</div><h2 id="revision-title">Revision & key notes</h2></div><span class="revision-mark">↻</span></div>
+            <div id="revision-summary" class="revision-summary" aria-live="polite"></div>
+            <div id="revision-targets" class="revision-targets"></div>
+            <button id="revision-load" class="revision-load" type="button" disabled>Revise latest attempt <span>↗</span></button>
+            <label class="revision-label" for="revision-focus">NEXT REVISION FOCUS</label>
+            <textarea id="revision-focus" class="revision-input" rows="3" placeholder="What will you change after this review? Pick one concrete improvement…"></textarea>
+            <div class="revision-save-status" id="revision-save-status">Saved per challenge</div>
+            <div class="key-notes-heading"><span>KEY NOTES</span><small>Keep useful principles close</small></div>
+            <form id="key-note-form" class="key-note-form"><label class="sr-only" for="key-note-input">Add a key note</label><input id="key-note-input" maxlength="180" placeholder="e.g. Keep pricing behind a policy" autocomplete="off"><button type="submit" aria-label="Add key note">Add <b>+</b></button></form>
+            <ul id="key-note-list" class="key-note-list" aria-live="polite"></ul>
+          </section>
           <section class="history-card"><div class="history-heading"><div><div class="section-caption"><span>04</span> YOUR PROGRESS</div><h2>Attempt history</h2></div><button id="clear-history" class="text-button" type="button">Clear</button></div><div id="history-list" class="history-list"></div><div class="history-footer"><span id="field-count">0 previous attempts</span><button id="new-attempt" type="button">Start a fresh attempt <span>↗</span></button></div></section>
           <div class="method-note"><span>✳</span><p><strong>Not a one-answer quiz.</strong> The rubric rewards clear evidence and reasoning. A different design can be just as strong.</p></div>
         </aside>

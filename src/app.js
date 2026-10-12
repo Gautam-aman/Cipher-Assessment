@@ -12,6 +12,7 @@ let fallbackVending = new VendingPreview();
 let previewVendingState = 'idle';
 let parkingDemoRunning = true;
 let requestedFloor = null;
+let revisionBaseAttemptId = null;
 let viewedAttempt = null;
 const $ = (selector) => document.querySelector(selector);
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
@@ -36,11 +37,34 @@ function renderProblems() {
     return `<button class="problem-card ${activeId === problem.id ? 'selected' : ''}" data-problem="${problem.id}" aria-label="${esc(problem.title)}, ${esc(problem.level)}, ${problem.minutes} minute challenge, ${attempts} previous attempts" aria-pressed="${activeId === problem.id}">
       <span class="mission-icon mission-icon-${key}">${challengeIcons[key]}</span><span class="mission-content"><span class="mission-title-row"><strong>${esc(problem.title)}</strong><span class="mission-status ${attempts ? 'practiced' : ''}">${attempts ? `${attempts} ${attempts === 1 ? 'TRY' : 'TRIES'}` : 'NEW'}</span></span><small>${esc(problem.category)}</small><span class="mission-meta"><span>${esc(problem.level)}</span><i>·</i><span>${problem.minutes} MIN</span></span></span><span class="mission-arrow">↗</span></button>`;
   }).join('');
+  renderChallengeGallery();
+}
+
+function renderChallengeGallery() {
+  const gallery = $('#challenge-gallery');
+  if (!gallery) return;
+  if (gallery.dataset.rendered === 'true') {
+    gallery.querySelectorAll('[data-problem]').forEach((card) => {
+      const selected = card.dataset.problem === activeId;
+      card.classList.toggle('is-active', selected);
+      card.setAttribute('aria-pressed', String(selected));
+      card.querySelector('.gallery-active-mark').innerHTML = `${selected ? 'SELECTED' : 'EXPLORE'} <b>↗</b>`;
+      card.querySelector('.gallery-card-action').innerHTML = `${selected ? 'Continue this design' : 'Start this challenge'} <b>↗</b>`;
+    });
+    return;
+  }
+  gallery.innerHTML = problems.map((problem, index) => `<button class="gallery-card gallery-card-${problem.id} ${activeId === problem.id ? 'is-active' : ''}" type="button" data-problem="${problem.id}" aria-pressed="${activeId === problem.id}" aria-label="Choose ${esc(problem.title)}, ${esc(problem.level)}, ${problem.minutes} minute challenge">
+    <span class="gallery-card-top"><span>CHALLENGE / 0${index + 1}</span><span class="gallery-active-mark">${activeId === problem.id ? 'SELECTED' : 'EXPLORE'} <b>↗</b></span></span>
+    <span class="gallery-art" aria-hidden="true"><i class="gallery-orbit orbit-a"></i><i class="gallery-orbit orbit-b"></i><i class="gallery-art-glow"></i><span class="gallery-art-icon">${challengeIcons[problem.id]}</span><span class="gallery-art-index">0${index + 1}</span></span>
+    <span class="gallery-card-copy"><span class="gallery-card-meta">${esc(problem.level)} <i>·</i> ${problem.minutes} MIN</span><strong>${esc(problem.title)}</strong><span class="gallery-card-summary">${esc(problem.summary)}</span><span class="gallery-card-action">${activeId === problem.id ? 'Continue this design' : 'Start this challenge'} <b>↗</b></span></span>
+  </button>`).join('');
+  gallery.dataset.rendered = 'true';
 }
 
 function renderProblem() {
   const problem = activeProblem();
   viewedAttempt = null;
+  revisionBaseAttemptId = null;
   fallbackVending.reset();
   previewVendingState = 'idle';
   parkingDemoRunning = true;
@@ -68,12 +92,36 @@ function renderProblem() {
   renderEmptyReview();
   renderProblems();
   renderHistory();
+  renderRevisionPanel();
 }
 
 function renderHistory() {
   const attempts = state.attempts.filter((item) => item.problemId === activeId).slice().reverse();
-  $('#history-list').innerHTML = attempts.length ? attempts.slice(0, 5).map((attempt, i) => `<button class="history-item" data-attempt="${esc(attempt.id)}"><span class="history-dot"></span><span class="history-main"><strong>Attempt ${attempt.number}</strong><small>${new Date(attempt.createdAt).toLocaleString()}</small></span><span class="history-score">${attempt.evaluation.score}<small>/100</small></span></button>`).join('') : `<div class="history-empty">No attempts yet. Your first design starts the learning loop.</div>`;
+  $('#history-list').innerHTML = attempts.length ? attempts.slice(0, 5).map((attempt) => `<button class="history-item" data-attempt="${esc(attempt.id)}"><span class="history-dot"></span><span class="history-main"><strong>Attempt ${attempt.number}${attempt.revisionOf ? ' <i>REVISION</i>' : ''}</strong><small>${new Date(attempt.createdAt).toLocaleString()}</small></span><span class="history-score">${attempt.evaluation.score}<small>/100</small></span></button>`).join('') : `<div class="history-empty">No attempts yet. Your first design starts the learning loop.</div>`;
   $('#clear-history').disabled = attempts.length === 0;
+}
+
+function renderRevisionPanel() {
+  const attempts = state.attempts.filter((item) => item.problemId === activeId).sort((a, b) => a.number - b.number);
+  const latest = attempts.at(-1);
+  const revisionBase = state.attempts.find((item) => item.id === revisionBaseAttemptId && item.problemId === activeId);
+  const current = revisionBase ?? (viewedAttempt && viewedAttempt.problemId === activeId ? viewedAttempt : latest);
+  $('#revision-load').disabled = !current;
+  $('#revision-load').innerHTML = `${revisionBase || viewedAttempt?.problemId === activeId ? `Revise attempt ${current.number}` : 'Revise latest attempt'} <span>↗</span>`;
+  if (!attempts.length) {
+    $('#revision-summary').innerHTML = `<div class="revision-empty"><strong>Your learning loop starts with a review.</strong><span>Submit one design to see score changes and focused revision ideas here.</span></div>`;
+    $('#revision-targets').innerHTML = '';
+  } else {
+    const score = latest.evaluation.score;
+    const delta = attempts.length > 1 ? score - attempts.at(-2).evaluation.score : null;
+    const bars = attempts.slice(-6).map((attempt) => `<span class="revision-bar" style="--bar-height:${Math.max(8, attempt.evaluation.score)}%" title="Attempt ${attempt.number}: ${attempt.evaluation.score}/100"><i>${attempt.number}</i></span>`).join('');
+    $('#revision-summary').innerHTML = `<div class="revision-metrics"><div class="revision-score"><strong>${score}</strong><span>/100 current</span></div><div class="revision-change ${delta > 0 ? 'is-up' : delta < 0 ? 'is-down' : ''}">${delta == null ? '<span>FIRST REVIEW</span>' : `<strong>${delta > 0 ? '+' : ''}${delta}</strong><span>since last attempt</span>`}</div><div class="revision-bars" role="img" aria-label="Score trend across ${attempts.length} attempts">${bars}</div></div>`;
+    const lowest = current.evaluation.criteria.slice().sort((a, b) => a.score - b.score).slice(0, 2);
+    $('#revision-targets').innerHTML = `<div class="revision-target-heading">${current.id !== latest.id ? `ATTEMPT ${current.number} REVIEW TARGETS` : 'POSSIBLE NEXT REVISION'}</div><ul>${lowest.map((item) => `<li><span>${esc(item.label)}</span><b>${item.score}/4</b></li>`).join('')}</ul>`;
+  }
+  $('#revision-focus').value = state.revisions.focuses[activeId] ?? '';
+  const notes = Array.isArray(state.revisions.notes[activeId]) ? state.revisions.notes[activeId] : [];
+  $('#key-note-list').innerHTML = notes.length ? notes.map((note) => `<li class="key-note"><span>${esc(note.text)}</span><small>${new Date(note.createdAt).toLocaleDateString()}</small><button type="button" data-delete-note="${esc(note.id)}" aria-label="Delete note: ${esc(note.text)}">×</button></li>`).join('') : `<li class="key-notes-empty">No key notes saved for this challenge yet.</li>`;
 }
 
 function collectDraft() {
@@ -167,8 +215,51 @@ function renderFeedback(evaluation) {
 $('#problem-list').addEventListener('click', (event) => {
   const button = event.target.closest('[data-problem]');
   if (!button) return;
-  activeId = button.dataset.problem;
+  selectChallenge(button.dataset.problem);
+});
+
+function selectChallenge(id, jumpToEditor = false) {
+  if (!problems.some((problem) => problem.id === id)) return;
+  activeId = id;
   renderProblem();
+  if (jumpToEditor) $('#problem-title').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+}
+
+$('#challenge-gallery').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-problem]');
+  if (button) selectChallenge(button.dataset.problem, true);
+});
+
+document.querySelectorAll('.magnetic-button').forEach((button) => {
+  button.addEventListener('pointermove', (event) => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || event.pointerType === 'touch') return;
+    const rect = button.getBoundingClientRect();
+    button.style.setProperty('--magnet-x', `${(event.clientX - rect.left - rect.width / 2) * 0.11}px`);
+    button.style.setProperty('--magnet-y', `${(event.clientY - rect.top - rect.height / 2) * 0.16}px`);
+  });
+  button.addEventListener('pointerleave', () => {
+    button.style.setProperty('--magnet-x', '0px');
+    button.style.setProperty('--magnet-y', '0px');
+  });
+});
+
+const galleryElement = $('#challenge-gallery');
+galleryElement.addEventListener('pointermove', (event) => {
+  const card = event.target.closest('.gallery-card');
+  if (!card || event.pointerType === 'touch' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const rect = card.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width - 0.5;
+  const y = (event.clientY - rect.top) / rect.height - 0.5;
+  card.style.setProperty('--tilt-x', `${x * 5}deg`);
+  card.style.setProperty('--tilt-y', `${-y * 5}deg`);
+  card.style.setProperty('--glow-x', `${(x + 0.5) * 100}%`);
+  card.style.setProperty('--glow-y', `${(y + 0.5) * 100}%`);
+});
+galleryElement.addEventListener('pointerout', (event) => {
+  const card = event.target.closest('.gallery-card');
+  if (!card || card.contains(event.relatedTarget)) return;
+  card.style.setProperty('--tilt-x', '0deg');
+  card.style.setProperty('--tilt-y', '0deg');
 });
 
 $('#workspace-form').addEventListener('input', () => {
@@ -193,8 +284,9 @@ $('#workspace-form').addEventListener('submit', (event) => {
   }
   const evaluation = evaluateSubmission(draft, activeProblem());
   const number = state.attempts.filter((item) => item.problemId === activeId).length + 1;
-  const attempt = { id: crypto.randomUUID(), problemId: activeId, number, createdAt: new Date().toISOString(), submission: draft, status: 'completed', evaluation };
+  const attempt = { id: crypto.randomUUID(), problemId: activeId, number, createdAt: new Date().toISOString(), submission: draft, revisionOf: revisionBaseAttemptId, status: 'completed', evaluation };
   state.attempts.push(attempt);
+  revisionBaseAttemptId = null;
   viewedAttempt = attempt;
   delete state.drafts[activeId];
   const persisted = save();
@@ -203,6 +295,7 @@ $('#workspace-form').addEventListener('submit', (event) => {
   renderProblemFieldsReset();
   renderProblems();
   renderHistory();
+  renderRevisionPanel();
   $('#draft-status').textContent = persisted ? 'REVIEW COMPLETE' : 'REVIEW COMPLETE · SESSION ONLY';
   $('#feedback-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
@@ -225,12 +318,14 @@ $('#history-list').addEventListener('click', (event) => {
   if (!attempt) return;
   viewedAttempt = attempt;
   renderFeedback(attempt.evaluation);
+  renderRevisionPanel();
   setPracticeStep('reflect');
   $('#draft-status').textContent = `VIEWING ATTEMPT ${attempt.number}`;
 });
 
 $('#new-attempt').addEventListener('click', () => {
   viewedAttempt = null;
+  revisionBaseAttemptId = null;
   for (const field of ['requirements', 'classes', 'relationships', 'tradeoffs']) $(`#${field}-input`).value = '';
   state.drafts[activeId] = { requirements: '', classes: '', relationships: '', tradeoffs: '' };
   save();
@@ -247,7 +342,55 @@ $('#clear-history').addEventListener('click', () => {
   save();
   renderProblems();
   renderHistory();
+  renderRevisionPanel();
   announce('Attempt history cleared.');
+});
+
+$('#revision-focus').addEventListener('input', (event) => {
+  state.revisions.focuses[activeId] = event.currentTarget.value;
+  const saved = save();
+  $('#revision-save-status').textContent = saved ? 'Saved for this challenge' : 'Could not save in this browser';
+  $('#revision-save-status').classList.toggle('save-error', !saved);
+});
+
+$('#key-note-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const input = $('#key-note-input');
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  const notes = Array.isArray(state.revisions.notes[activeId]) ? state.revisions.notes[activeId] : [];
+  notes.unshift({ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() });
+  state.revisions.notes[activeId] = notes;
+  input.value = '';
+  save();
+  renderRevisionPanel();
+  input.focus();
+});
+
+$('#key-note-list').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-delete-note]');
+  if (!button) return;
+  state.revisions.notes[activeId] = (state.revisions.notes[activeId] ?? []).filter((note) => note.id !== button.dataset.deleteNote);
+  save();
+  renderRevisionPanel();
+});
+
+$('#revision-load').addEventListener('click', () => {
+  const attempts = state.attempts.filter((item) => item.problemId === activeId);
+  const attempt = viewedAttempt?.problemId === activeId ? viewedAttempt : attempts.at(-1);
+  if (!attempt) return;
+  revisionBaseAttemptId = attempt.id;
+  viewedAttempt = null;
+  for (const field of ['requirements', 'classes', 'relationships', 'tradeoffs']) $(`#${field}-input`).value = attempt.submission[field] ?? '';
+  state.drafts[activeId] = collectDraft();
+  save();
+  updateDraftProgress(state.drafts[activeId]);
+  setPracticeStep('design');
+  $('#draft-status').textContent = `REVISING ATTEMPT ${attempt.number}`;
+  renderRevisionPanel();
+  $('#requirements-input').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  $('#requirements-input').focus({ preventScroll: true });
+  announce(`Attempt ${attempt.number} loaded as a new revision. The original is preserved.`);
 });
 
 $('#sidebar-toggle').addEventListener('click', (event) => {
@@ -364,7 +507,7 @@ const revealObserver = 'IntersectionObserver' in window ? new IntersectionObserv
     }
   });
 }, { threshold: 0.12 }) : null;
-document.querySelectorAll('.brief-card, .design-card, .review-card, .history-card, .page-footer').forEach((element) => {
+document.querySelectorAll('.challenge-gallery-section, .gallery-card, .concept-marquee, .brief-card, .design-card, .review-card, .revision-card, .history-card, .page-footer').forEach((element) => {
   element.classList.add('scroll-reveal');
   if (revealObserver) revealObserver.observe(element);
   else element.classList.add('is-revealed');
