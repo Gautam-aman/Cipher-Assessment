@@ -61,7 +61,7 @@ function updateDraftProgress(draft) {
   ].filter(Boolean).length;
   $('#draft-completion-label').textContent = `${ready} / 4 ready`;
   $('#draft-progress').setAttribute('aria-valuenow', String(ready));
-  $('#draft-progress-fill').style.width = `${ready * 25}%`;
+  $('#draft-progress').setAttribute('data-ready', String(ready));
 }
 
 function renderEmptyReview() {
@@ -84,7 +84,9 @@ function renderFeedback(evaluation) {
     return;
   }
   const strong = evaluation.criteria.filter((item) => item.score >= 3).length;
-  $('#feedback-panel').innerHTML = `<div class="review-top"><div><span class="eyebrow">DESIGN REVIEW</span><h3>${strong >= 4 ? 'A solid foundation' : 'A useful first pass'}</h3></div><div class="score-ring" style="--score:${evaluation.score}"><span>${evaluation.score}</span><small>/100</small></div></div>
+  const circumference = 106.81;
+  const ringOffset = (circumference * (100 - evaluation.score) / 100).toFixed(2);
+  $('#feedback-panel').innerHTML = `<div class="review-top"><div><span class="eyebrow">DESIGN REVIEW</span><h3>${strong >= 4 ? 'A solid foundation' : 'A useful first pass'}</h3></div><div class="score-ring" role="img" aria-label="Design review score: ${evaluation.score} out of 100"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="score-track" cx="20" cy="20" r="17"/><circle class="score-progress" cx="20" cy="20" r="17" stroke-dasharray="${circumference}" stroke-dashoffset="${ringOffset}" transform="rotate(-90 20 20)"/></svg><span>${evaluation.score}</span><small>/100</small></div></div>
     <p class="review-intro">A rubric based review of the evidence in your submission. Use each suggestion to shape your next attempt.</p>
     <div class="criteria-list">${evaluation.criteria.map((item) => `<article class="criterion"><div class="criterion-head"><strong>${esc(item.label)}</strong><span>${item.score}<small> / 4</small></span></div><div class="score-bars">${[1,2,3,4].map((n) => `<i class="${n <= item.score ? 'filled' : ''}"></i>`).join('')}</div><p>${esc(item.feedback)}</p></article>`).join('')}</div>
     <div class="review-footnote"><span>ⓘ</span> Scores reflect rubric evidence, not a single “correct” design. This prototype uses deterministic keyword checks; human or AI review can plug into the same evaluation contract.</div>`;

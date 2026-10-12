@@ -8,7 +8,8 @@ Blueprint is a focused low-level design practice prototype. Choose a prompt, exp
 - Structured text submission for assumptions, responsibilities, relationships, trade-offs, edge cases, and tests.
 - Browser-local draft autosave and attempt history.
 - Six-part review with scores, visible evidence cues, and specific improvement prompts.
-- Responsive, keyboard-operable interface with progress feedback, restrained motion, reduced-motion support, validation, and storage fallback states.
+- Midnight Studio visual system with a collapsible desktop challenge rail, mission cards, and horizontal small-screen navigation.
+- Draft readiness feedback, responsive keyboard-accessible controls, restrained transitions, reduced-motion support, and storage fallback states.
 
 ## Stack and architecture
 
@@ -54,6 +55,7 @@ The test suite checks incomplete and whitespace-only submissions, valid rubric r
 
 - [Assessment analysis](docs/ASSESSMENT_ANALYSIS.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
+- [Midnight Studio design audit and plan](docs/DESIGN_AUDIT.md)
 - [Research note](docs/RESEARCH_NOTE.md)
 - [Design note](docs/DESIGN_NOTE.md)
 - [Architecture](docs/ARCHITECTURE.md)
