@@ -2,6 +2,7 @@ import { problems } from './problems.js';
 import { evaluateSubmission, validateSubmission } from './evaluation.js';
 import { loadState, saveState } from './storage.js';
 import { VendingPreview } from './vending.js';
+import { createHldStudio } from './hld.js';
 
 const state = loadState();
 let activeId = problems[0].id;
@@ -63,6 +64,7 @@ function renderChallengeGallery() {
 
 function renderProblem() {
   const problem = activeProblem();
+  hldStudio.setChallenge(activeId);
   viewedAttempt = null;
   revisionBaseAttemptId = null;
   fallbackVending.reset();
@@ -497,6 +499,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+const hldStudio = createHldStudio($('#hld-studio'), activeId);
 renderProblem();
 document.documentElement.classList.add('motion-ready');
 const revealObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries, observer) => {
@@ -507,7 +510,7 @@ const revealObserver = 'IntersectionObserver' in window ? new IntersectionObserv
     }
   });
 }, { threshold: 0.12 }) : null;
-document.querySelectorAll('.challenge-gallery-section, .gallery-card, .concept-marquee, .brief-card, .design-card, .review-card, .revision-card, .history-card, .page-footer').forEach((element) => {
+document.querySelectorAll('.challenge-gallery-section, .gallery-card, .concept-marquee, .brief-card, .design-card, .review-card, .revision-card, .history-card, .hld-studio, .page-footer').forEach((element) => {
   element.classList.add('scroll-reveal');
   if (revealObserver) revealObserver.observe(element);
   else element.classList.add('is-revealed');

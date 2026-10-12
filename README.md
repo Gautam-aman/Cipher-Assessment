@@ -14,6 +14,7 @@ Blueprint is a focused low-level design practice studio. Choose a prompt, explai
 - Real score trend bars and review-driven revision targets based on each attempt's lowest rubric dimensions.
 - Six-part deterministic review with evidence cues and specific improvement prompts.
 - Presentation mode for the current draft or most recently reviewed submission.
+- High-level architecture sketch board with draggable components, request-flow connectors, per-challenge autosave, undo, rename/delete, and SVG export.
 - Architecture studio design with a white drafting-paper canvas, collapsible desktop rail, responsive mobile challenge picker, reduced-motion support, and draft readiness feedback.
 
 ## Stack and architecture
@@ -39,6 +40,7 @@ Open <http://127.0.0.1:4173>. Set `PORT` to use another local port.
 3. Fill the four design-note sections. Drafts autosave in this browser.
 4. Submit with the button or `Ctrl/⌘ + Enter`, then review the six dimensions and attempt history.
 5. Open presentation mode with the top-right button or `Ctrl/⌘ + Shift + P`. Save with `Ctrl/⌘ + S`.
+6. Build a high-level diagram on the Architecture board. Drag components to arrange them, use Connect to join two components, double-click to rename, and export the canvas as SVG.
 
 ## Tests
 

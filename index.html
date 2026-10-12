@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090c15">
-  <meta name="description" content="Practice low-level design with clear prompts, evidence-based feedback, and a history that helps you improve.">
-  <title>Blueprint — Midnight Design Studio</title>
+  <meta name="theme-color" content="#f4f6f8">
+  <meta name="description" content="Practice low-level and high-level design with interactive diagrams, clear prompts, and evidence-based feedback.">
+  <title>Blueprint — Architecture Design Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,6 +23,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="side-head"><div class="side-label">YOUR STUDIO</div><button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Collapse challenge navigation" aria-expanded="true" title="Collapse navigation"><span>‹</span></button></div>
       <button class="nav-item active" type="button" aria-current="page"><span class="nav-icon">⌘</span><span class="nav-copy">Practice studio</span><span class="nav-arrow">↗</span></button>
+      <a class="nav-item hld-nav-link" href="#hld-studio"><span class="nav-icon">⌁</span><span class="nav-copy">Architecture board</span><span class="nav-arrow">↗</span></a>
       <div class="side-divider"></div>
       <div class="side-label problem-label">CHOOSE A CHALLENGE <span>03</span></div>
       <nav id="problem-list" class="problem-list" aria-label="Practice problems"></nav>
@@ -88,7 +89,39 @@
           <div class="method-note"><span>✳</span><p><strong>Not a one-answer quiz.</strong> The rubric rewards clear evidence and reasoning. A different design can be just as strong.</p></div>
         </aside>
       </div>
-      <footer class="page-footer"><span>BLUEPRINT <b>·</b> LOW-LEVEL DESIGN PRACTICE</span><span>Made for thoughtful engineering.</span></footer>
+      <section class="hld-studio" id="hld-studio" aria-labelledby="hld-title">
+        <header class="hld-heading">
+          <div><div class="section-caption"><span>06</span> SYSTEM SHAPE / HIGH LEVEL DESIGN</div><h2 id="hld-title">Map the architecture.</h2><p>Sketch the major components and how requests move between them.</p></div>
+          <span class="hld-live"><i></i> AUTOSAVED PER CHALLENGE</span>
+        </header>
+        <div class="hld-toolbar" role="toolbar" aria-label="Architecture diagram tools">
+          <div class="hld-tool-group" aria-label="Canvas tools">
+            <button type="button" data-hld-tool="select" aria-pressed="true" title="Select and move components">↖ <span>Select</span></button>
+            <button type="button" data-hld-tool="connect" aria-pressed="false" title="Connect two components">↗ <span>Connect</span></button>
+          </div>
+          <span class="hld-toolbar-rule"></span>
+          <div class="hld-tool-group hld-add-group" aria-label="Add a component">
+            <button type="button" data-hld-tool="add:user"><i class="hld-tool-dot sand"></i>Client</button>
+            <button type="button" data-hld-tool="add:gateway"><i class="hld-tool-dot blue"></i>Gateway</button>
+            <button type="button" data-hld-tool="add:service"><i class="hld-tool-dot teal"></i>Service</button>
+            <button type="button" data-hld-tool="add:database"><i class="hld-tool-dot amber"></i>Database</button>
+            <button type="button" data-hld-tool="add:cache"><i class="hld-tool-dot rose"></i>Cache</button>
+            <button type="button" data-hld-tool="add:queue"><i class="hld-tool-dot violet"></i>Queue</button>
+          </div>
+          <span class="hld-toolbar-rule"></span>
+          <div class="hld-tool-group hld-actions" aria-label="Diagram actions">
+            <button type="button" data-hld-tool="undo" title="Undo (Ctrl/⌘ Z)">↶ <span>Undo</span></button>
+            <button type="button" data-hld-tool="clear" title="Clear diagram">⌫ <span>Clear</span></button>
+            <button type="button" data-hld-tool="export" title="Download diagram as SVG">⇩ <span>Export SVG</span></button>
+          </div>
+        </div>
+        <div class="hld-canvas-wrap" data-mode="select">
+          <svg class="hld-canvas" viewBox="0 0 1200 620" role="application" aria-label="High level architecture diagram. Drag components to move them. Use Connect, then select two components to draw an arrow. Double-click a component to rename it." tabindex="0"></svg>
+          <div class="hld-canvas-hint">DRAG TO ARRANGE <b>·</b> DOUBLE-CLICK TO RENAME <b>·</b> CONNECT TOOL TO DRAW FLOWS</div>
+        </div>
+        <footer class="hld-footer"><span class="hld-save-status" aria-live="polite">Saved in this browser</span><span>Choose a component to select it. Press Delete to remove it.</span></footer>
+      </section>
+      <footer class="page-footer"><span>BLUEPRINT <b>·</b> LOW-LEVEL & HIGH-LEVEL DESIGN</span><span>Made for thoughtful engineering.</span></footer>
     </main>
   </div>
   <dialog id="presentation-dialog" class="presentation-dialog" aria-labelledby="presentation-title"><div class="presentation-frame"><div class="presentation-top"><div><span class="eyebrow">BLUEPRINT / SOLUTION PREVIEW</span><h2 id="presentation-title">Your design, in one view</h2></div><button id="presentation-close" class="dialog-close" type="button" aria-label="Close presentation">×</button></div><p id="presentation-problem" class="presentation-problem"></p><div id="presentation-content" class="presentation-content"></div><div class="presentation-footer"><span>Generated from your current saved draft</span><button id="presentation-edit" class="submit-button" type="button">Back to editing <span>↗</span></button></div></div></dialog>

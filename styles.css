@@ -1044,3 +1044,72 @@ button:focus-visible,a:focus-visible { outline-color: #256f91; }
   .review-top { padding: 12px; }
   .criterion { padding: 10px; }
 }
+
+/* High-level architecture sketch board. */
+.hld-nav-link { margin-top: 7px; text-decoration: none; }
+.hld-studio { min-width: 0; margin-top: 42px; padding: clamp(18px,2.5vw,30px); border: 1px solid #dbe2eb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px #23374b0a,0 1px 2px #23374b0a; }
+.hld-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.hld-heading h2 { margin: 7px 0 5px; color: #1b2c42; font: 700 clamp(24px,3vw,34px)/1.1 var(--display); letter-spacing: -.055em; }
+.hld-heading p { margin: 0; color: #68798d; font-size: 12px; line-height: 1.6; }
+.hld-live { flex: 0 0 auto; margin-top: 7px; padding: 7px 9px; display: flex; align-items: center; gap: 7px; border: 1px solid #dce8e4; border-radius: 4px; background: #f7fbf9; color: #58766f; font: 7px var(--mono); letter-spacing: .07em; }
+.hld-live i { width: 6px; height: 6px; border-radius: 50%; background: #209a81; box-shadow: 0 0 0 3px #209a8119; }
+.hld-toolbar { margin-top: 20px; padding: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 7px; border: 1px solid #e2e7ed; border-bottom: 0; border-radius: 5px 5px 0 0; background: #fbfcfd; }
+.hld-tool-group { display: flex; flex-wrap: wrap; gap: 4px; }
+.hld-tool-group button { min-height: 32px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #52647b; font: 10px var(--sans); transition: background .16s,border-color .16s,color .16s,transform .16s; }
+.hld-tool-group button:hover { border-color: #dce3ed; background: #fff; color: #233d66; }
+.hld-tool-group button:active { transform: translateY(1px); }
+.hld-tool-group button[aria-pressed="true"] { border-color: #cdd8f0; background: #edf2ff; color: #3e5bb0; }
+.hld-tool-group button span { font-size: 9px; }
+.hld-toolbar-rule { width: 1px; height: 23px; background: #e1e6ed; }
+.hld-add-group { flex: 1; }
+.hld-add-group button { padding: 0 7px; }
+.hld-tool-dot { width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; background: currentColor; }
+.hld-tool-dot.sand { color: #bf8f51; }.hld-tool-dot.blue { color: #5572c5; }.hld-tool-dot.teal { color: #248c87; }
+.hld-tool-dot.amber { color: #ba8737; }.hld-tool-dot.rose { color: #b46d7d; }.hld-tool-dot.violet { color: #8260b8; }
+.hld-actions { margin-left: auto; }
+.hld-canvas-wrap { position: relative; overflow: hidden; border: 1px solid #dce3ec; border-radius: 0 0 5px 5px; background: #fcfcfa; }
+.hld-canvas-wrap[data-mode="connect"] { cursor: crosshair; }
+.hld-canvas { width: 100%; height: auto; min-height: 360px; display: block; aspect-ratio: 1200 / 620; touch-action: none; }
+.hld-paper { fill: #fcfcfa; }
+.hld-canvas-wrap[data-mode="select"] .hld-node { cursor: grab; }
+.hld-node { outline: none; }
+.hld-node:active { cursor: grabbing; }
+.hld-node-shape { fill: #f4f6ff; stroke: #4c68bd; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; transition: fill .16s,stroke .16s; }
+.hld-node-echo { fill: none; stroke: #4c68bd66; stroke-width: 1.1; vector-effect: non-scaling-stroke; pointer-events: none; }
+.hld-node-type { fill: #748198; font: 10px var(--mono); letter-spacing: 1.5px; pointer-events: none; }
+.hld-node-label { fill: #26374e; font: 600 18px var(--sans); pointer-events: none; }
+.hld-node-dot { fill: #4c68bd; }
+.hld-node.is-selected .hld-node-shape { fill: #edf2ff; stroke: #3355be; stroke-width: 2.5; }
+.hld-selection { fill: none; stroke: #96a9db; stroke-width: 1; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; pointer-events: none; }
+.hld-node.teal .hld-node-shape { fill: #edf8f6; stroke: #348c87; }.hld-node.teal .hld-node-echo { stroke: #348c8766; }.hld-node.teal .hld-node-dot { fill: #348c87; }
+.hld-node.amber .hld-node-shape { fill: #fff7e8; stroke: #b8883d; }.hld-node.amber .hld-node-echo { stroke: #b8883d66; }.hld-node.amber .hld-node-dot { fill: #b8883d; }
+.hld-node.rose .hld-node-shape { fill: #fff3f4; stroke: #b46d7d; }.hld-node.rose .hld-node-echo { stroke: #b46d7d66; }.hld-node.rose .hld-node-dot { fill: #b46d7d; }
+.hld-node.violet .hld-node-shape { fill: #f7f1ff; stroke: #8260b8; }.hld-node.violet .hld-node-echo { stroke: #8260b866; }.hld-node.violet .hld-node-dot { fill: #8260b8; }
+.hld-node.sand .hld-node-shape { fill: #fff8ee; stroke: #bf8f51; }.hld-node.sand .hld-node-echo { stroke: #bf8f5166; }.hld-node.sand .hld-node-dot { fill: #bf8f51; }
+.hld-edge-shadow { fill: none; stroke: #526fb829; stroke-width: 5; stroke-linecap: round; }
+.hld-edge-line { fill: none; stroke: #4865bd; stroke-width: 1.8; stroke-linecap: round; stroke-dasharray: 8 5; }
+.hld-canvas-wrap.is-connecting .hld-node-shape { stroke-width: 2.5; }
+.hld-canvas-prompt { position: absolute; top: 12px; left: 50%; padding: 8px 12px; transform: translateX(-50%); border: 1px solid #cbd7ec; border-radius: 4px; background: #fff; color: #39548d; box-shadow: 0 4px 14px #24385812; font-size: 10px; white-space: nowrap; }
+.hld-canvas-prompt button { margin-left: 10px; padding: 2px 5px; border: 0; background: transparent; color: #708096; font-size: 9px; text-decoration: underline; }
+.hld-canvas-hint { position: absolute; right: 12px; bottom: 10px; padding: 5px 7px; border: 1px solid #e1e6ed; border-radius: 3px; background: #ffffffdf; color: #7d8998; font: 6px var(--mono); letter-spacing: .04em; pointer-events: none; }
+.hld-canvas-hint b { padding: 0 4px; color: #6279bc; }
+.hld-footer { margin-top: 10px; display: flex; justify-content: space-between; gap: 12px; color: #7b8999; font-size: 9px; }
+.hld-save-status { color: #388473; }
+@media (max-width: 850px) {
+  .hld-studio { margin-top: 28px; }
+  .hld-canvas { min-height: 300px; }
+}
+@media (max-width: 680px) {
+  .hld-heading { display: grid; }
+  .hld-live { margin-top: 0; width: max-content; }
+  .hld-toolbar { gap: 5px; }
+  .hld-toolbar-rule { display: none; }
+  .hld-add-group { flex: 1 0 100%; order: 3; }
+  .hld-actions { margin-left: 0; }
+  .hld-tool-group button { min-height: 30px; padding: 0 7px; }
+  .hld-canvas { min-height: 250px; }
+  .hld-canvas-hint { right: 6px; bottom: 6px; max-width: calc(100% - 12px); font-size: 5px; }
+  .hld-footer { flex-direction: column; gap: 4px; }
+  .hld-canvas-prompt { max-width: calc(100% - 16px); font-size: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .hld-tool-group button { transition: none; } }
