@@ -2,6 +2,13 @@
 
 Blueprint is a focused low-level design practice studio. Choose a prompt, explain your design, submit it for a transparent rubric review, and revisit attempts to improve your reasoning.
 
+**Hosted project:** [inspiring-zuccutto-2bff94.netlify.app](https://inspiring-zuccutto-2bff94.netlify.app/)
+
+### Highlights
+
+- **High-level design canvas:** sketch system architecture with draggable components, request-flow connectors, per-challenge autosave, undo, rename/delete, and SVG export.
+- **Revision & key notes:** compare scores over time, load a previous submission as a new revision, save a focused next-step goal, and keep dated design notes for each challenge.
+
 ## Features
 
 - Three contextualized LLD challenges: parking lot, vending machine, and elevator system.
@@ -57,8 +64,18 @@ The suite covers incomplete/valid submission, rubric feedback, malformed storage
 - Preview buttons mirror key model interactions for keyboard and non-WebGL use. The vending flow is explicitly a local simulation; it does not process payment.
 - Scroll reveals and the document progress line use native scroll and `IntersectionObserver`; no scroll hijacking is used. See [motion verification](docs/MOTION_VERIFICATION.md) for checks and browser verification limits.
 - The [reference notes](docs/MOTION_REFERENCE.md) record which Visuvate cues were available and which live interactions could not be inspected here.
-- Structured text is the chosen submission format; UML/code editing is not implemented.
+- LLD submissions use structured text; HLD architecture diagrams are created in the interactive canvas.
 - Feedback cues are deterministic and transparent, but they are not semantic evaluation and may miss equivalent wording.
 - Data stays in localStorage for this browser profile. There is no account, backend, sync, or cross-device history.
 
 The assessment's final submission step is a Google Form. This workspace does not submit to it.
+
+## AI usage
+
+AI assistance was used as a design and implementation aid; final scope choices and code review remain the candidate's responsibility.
+
+1. **Practice input scope.** AI suggested supporting text, code, and diagrams to capture more evidence. I kept structured text for the LLD submission because it reveals responsibilities, collaboration, and rationale without spending most of the assignment building a code editor. The HLD canvas provides a separate visual architecture tool.
+2. **Feedback strategy.** AI suggested an unconstrained LLM reviewer. I rejected that as the default because it would require credentials, add latency and cost, and could produce opaque judgments. The prototype uses deterministic completeness and rubric cues with evidence and actionable prompts; the limitation is documented, and the result contract can host an LLM or human reviewer later.
+3. **Architecture.** AI proposed separate workflow, problem, evaluation, and persistence responsibilities. I accepted those boundaries but kept them as small modules in one static monolith, consistent with the assignment's scope and change tests.
+4. **Reliability.** AI recommended saving drafts and preserving attempt snapshots. I accepted browser-local autosave and stored submitted drafts with their review so later editing does not rewrite history. I also made storage failure degrade to a visible session-only state.
+5. **Research framing.** AI helped compare public descriptions of a broad LLD toolkit, a guided OOD course, and collaborative drawing. I used that comparison to define a narrow product direction and explicitly marked the scan as limited rather than implying user research.
