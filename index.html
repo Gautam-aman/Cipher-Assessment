@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090c15">
+  <meta name="description" content="Practice low-level design with clear prompts, evidence-based feedback, and a history that helps you improve.">
+  <title>Blueprint — Midnight Design Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to practice</a>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Blueprint home"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span>blueprint<span class="brand-dot">.</span></span></a>
+    <div class="topbar-center"><span class="breadcrumb-muted">Workspace</span><span class="crumb-slash">/</span><span>Design studio</span><span class="topbar-state"><i></i> LOCAL</span></div>
+    <div class="topbar-right"><span class="session-pill"><i></i> PRIVATE SESSION</span><span class="avatar" aria-label="Blueprint workspace">B</span></div>
+  </header>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-head"><div class="side-label">YOUR STUDIO</div><button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Collapse challenge navigation" aria-expanded="true" title="Collapse navigation"><span>‹</span></button></div>
+      <button class="nav-item active" type="button" aria-current="page"><span class="nav-icon">⌘</span><span class="nav-copy">Practice studio</span><span class="nav-arrow">↗</span></button>
+      <div class="side-divider"></div>
+      <div class="side-label problem-label">CHOOSE A CHALLENGE <span>03</span></div>
+      <nav id="problem-list" class="problem-list" aria-label="Practice problems"></nav>
+      <div class="sidebar-tip"><span class="tip-spark">✳</span><div><strong>Think in trade-offs.</strong><p>Strong designs make their reasoning visible.</p></div></div>
+      <div class="sidebar-bottom"><span class="privacy-icon">◉</span><span class="sidebar-foot-copy">Saved privately in this browser</span></div>
+    </aside>
+    <main id="main-content" class="main-content">
+      <section class="welcome-row hero-panel">
+        <div class="hero-copy"><div class="overline"><span class="overline-line"></span> BLUEPRINT <span class="overline-slash">/</span> PRACTICE MODE</div><h1>Think in systems.<br><em>Design with intent.</em></h1><p class="welcome-sub">A focused space to shape your ideas, test your trade-offs, and sharpen your design instincts.</p><a class="hero-cta" href="#requirements-input">Enter the studio <span>↗</span></a><div class="hero-proof"><span><i class="proof-dot"></i> 3 design missions</span><b>·</b><span>One thoughtful iteration at a time</span></div></div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-caption"><span>THE DESIGN LOOP</span><span class="art-live"><i></i> IN PROGRESS</span></div>
+          <svg class="graph-lines" viewBox="0 0 420 190" fill="none" preserveAspectRatio="none"><path d="M117 92H174M254 92H307M214 111V146H108" stroke="url(#lineGradient)" stroke-width="1.5" stroke-dasharray="4 5"/><circle cx="145" cy="92" r="3" fill="#b7a2ff"/><circle cx="280" cy="92" r="3" fill="#6ce8df"/><circle cx="214" cy="128" r="3" fill="#6ce8df"/><defs><linearGradient id="lineGradient" x1="108" y1="92" x2="307" y2="146" gradientUnits="userSpaceOnUse"><stop stop-color="#9b7cff" stop-opacity=".25"/><stop offset=".5" stop-color="#79dfe1"/><stop offset="1" stop-color="#4be0d0" stop-opacity=".2"/></linearGradient></defs></svg>
+          <div class="art-node node-problem"><span class="node-icon">01</span><span><small>CHOOSE</small><strong>A problem</strong></span><i class="node-check">✓</i></div>
+          <div class="art-node node-design"><span class="node-icon node-icon-main">02</span><span><small>DESIGN</small><strong>Your approach</strong></span><span class="node-pulse"></span></div>
+          <div class="art-node node-review"><span class="node-icon">03</span><span><small>REFLECT</small><strong>Clear feedback</strong></span><span class="node-arrow">↗</span></div>
+          <div class="art-note"><span>✳</span> Every design has a story.</div>
+        </div>
+        <div class="loop" aria-label="Practice loop: choose, design, submit, reflect"><span id="step-choose" class="loop-step loop-active">01 <small>CHOOSE</small></span><b>·</b><span id="step-design" class="loop-step">02 <small>DESIGN</small></span><b>·</b><span id="step-reflect" class="loop-step">03 <small>REFLECT</small></span></div>
+      </section>
+      <div class="work-grid">
+        <section class="work-column" aria-label="Problem and design workspace">
+          <article class="brief-card">
+            <div class="brief-top"><span id="problem-level" class="level-pill">FOUNDATIONS</span><span id="problem-time" class="time-label">25 MIN ESTIMATE</span></div>
+            <h2 id="problem-title">Parking lot</h2><p id="problem-summary" class="brief-summary"></p>
+            <div class="requirements-block"><div class="section-caption"><span>01</span> WHAT YOUR DESIGN SHOULD HANDLE</div><ul id="requirements" class="requirement-list"></ul></div>
+            <div class="extension-box"><span class="extension-mark">↗</span><div><div class="extension-caption">DESIGN FOR CHANGE</div><p id="extension-prompt"></p></div></div>
+          </article>
+          <section class="design-card">
+            <div class="design-header"><div><div class="section-caption"><span>02</span> YOUR DESIGN NOTES</div><h2>Work through the shape.</h2></div><span id="draft-status" class="draft-status">READY TO DESIGN</span></div>
+            <p class="design-intro">A little structure makes your reasoning easier to review. Keep it rough; clarity beats polish.</p>
+            <div class="draft-completion"><div class="completion-meta"><span>SECTION READINESS</span><span id="draft-completion-label">0 / 4 ready</span></div><div id="draft-progress" class="draft-progress" role="progressbar" aria-label="Draft section readiness" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><span id="draft-progress-fill"></span></div></div>
+            <form id="workspace-form" novalidate>
+              <label class="field-label" for="requirements-input"><span class="field-number">A</span><span><strong>Requirements & assumptions</strong><small>What are you solving? What are you assuming?</small></span></label>
+              <textarea id="requirements-input" rows="3" placeholder="List the key behaviors and clarify anything the prompt leaves open…"></textarea>
+              <label class="field-label" for="classes-input"><span class="field-number">B</span><span><strong>Classes & responsibilities</strong><small>Who owns each decision or piece of behavior?</small></span></label>
+              <textarea id="classes-input" rows="3" placeholder="Name your core objects, what each one owns, and any useful interfaces…"></textarea>
+              <label class="field-label" for="relationships-input"><span class="field-number">C</span><span><strong>Relationships & flow</strong><small>How do the objects collaborate in the main scenario?</small></span></label>
+              <textarea id="relationships-input" rows="3" placeholder="Describe the links and walk through one request from start to finish…"></textarea>
+              <label class="field-label" for="tradeoffs-input"><span class="field-number">D</span><span><strong>Trade-offs, edge cases & tests</strong><small>What can fail? What would you test? Why this shape?</small></span></label>
+              <textarea id="tradeoffs-input" rows="3" placeholder="Explain a design choice, a failure path, and how you would test it…"></textarea>
+              <div class="form-footer"><span><span class="autosave-icon">✓</span> Draft autosaves in this browser</span><button type="submit" class="submit-button">Submit for review <span>↗</span></button></div>
+            </form>
+          </section>
+        </section>
+        <aside class="review-column" aria-label="Design feedback and attempt history">
+          <section class="review-card"><div class="review-heading"><div><div class="section-caption"><span>03</span> REFLECT & IMPROVE</div><h2>Design review</h2></div><span class="review-spark">✳</span></div><div id="feedback-panel" aria-live="polite"><div class="feedback-empty"><div class="empty-icon">↗</div><strong>Your review appears here</strong><p>Submit a design to get evidence-based feedback across six dimensions.</p></div></div></section>
+          <section class="history-card"><div class="history-heading"><div><div class="section-caption"><span>04</span> YOUR PROGRESS</div><h2>Attempt history</h2></div><button id="clear-history" class="text-button" type="button">Clear</button></div><div id="history-list" class="history-list"></div><div class="history-footer"><span id="field-count">0 previous attempts</span><button id="new-attempt" type="button">Start a fresh attempt <span>↗</span></button></div></section>
+          <div class="method-note"><span>✳</span><p><strong>Not a one-answer quiz.</strong> The rubric rewards clear evidence and reasoning. A different design can be just as strong.</p></div>
+        </aside>
+      </div>
+      <footer class="page-footer"><span>BLUEPRINT <b>·</b> LOW-LEVEL DESIGN PRACTICE</span><span>Made for thoughtful engineering.</span></footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
